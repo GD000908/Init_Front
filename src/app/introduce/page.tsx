@@ -65,19 +65,20 @@ export default function IntroducePage() {
   }, []);
 
   const handleToggleChange = useCallback((checked: boolean) => {
-    if (checked && questions.length > 1) {
-      // 토글을 켜려고 할 때는 그냥 켜기
-      setShowQuestionHeaders(true);
-    } else if (!checked && questions.length > 1) {
-      // 토글을 끄려고 할 때 (단일 지문으로 변경) 경고
+    if (!checked && questions.length > 1) {
+      // 토글을 끄려고 할 때는 그냥 끄기 (다중 문항 모드)
+      setShowQuestionHeaders(false);
+    } else if (checked && questions.length > 1) {
+      // 토글을 켜려고 할 때 (단일 문항으로 변경) 경고
       const confirmed = window.confirm(
-          '문항별 제목을 숨기면 첫 번째 문항만 남고 나머지 문항들은 삭제됩니다.\n\n정말로 계속하시겠습니까?'
+          '단일 질문 모드로 변경하면 첫 번째 문항만 남고 나머지 문항들은 삭제됩니다.\n\n정말로 계속하시겠습니까?'
       );
 
       if (confirmed) {
         setQuestions([questions[0]]);
-        setShowQuestionHeaders(false);
+        setShowQuestionHeaders(true);
       }
+      // confirmed가 false면 토글 상태 변경 안됨 (현재 상태 유지)
     } else {
       setShowQuestionHeaders(checked);
     }
@@ -166,8 +167,8 @@ export default function IntroducePage() {
                     />
                     <span className={styles.toggleSlider}></span>
                   </label>
-                  <span className={styles.toggleText} title="ON: 문항별 제목 작성 가능 / OFF: 내용만 작성">
-                  ⓘ
+                  <span className={styles.toggleText} title="OFF: 문항별 제목 작성 가능 / ON: 단일 질문 내용만 작성">
+                  ⓘ  "OFF: 문항별 제목 작성 가능 / ON: 단일 질문 내용만 작성"
                 </span>
                 </div>
 
