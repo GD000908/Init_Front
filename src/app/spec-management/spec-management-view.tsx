@@ -59,6 +59,47 @@ const useScript = (url: string) => {
     return status;
 };
 
+// --- 🔥 전화번호 포맷팅 유틸리티 함수 ---
+const formatPhoneNumber = (value: string): string => {
+    // 숫자만 추출
+    const numbers = value.replace(/[^\d]/g, '');
+
+    // 11자리를 초과하면 자르기
+    const trimmed = numbers.slice(0, 11);
+
+    // 포맷팅 적용 (3-4-4 형식)
+    if (trimmed.length <= 3) {
+        return trimmed;
+    } else if (trimmed.length <= 7) {
+        return `${trimmed.slice(0, 3)}-${trimmed.slice(3)}`;
+    } else {
+        return `${trimmed.slice(0, 3)}-${trimmed.slice(3, 7)}-${trimmed.slice(7)}`;
+    }
+};
+
+// --- 🔥 포맷팅된 전화번호 입력 컴포넌트 ---
+const PhoneInput = ({ value, onChange, ...props }: {
+    value: string;
+    onChange: (value: string) => void;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) => {
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        onChange(formatted);
+    };
+
+    return (
+        <Input
+            {...props}
+            value={value}
+            onChange={handleChange}
+            placeholder="010-0000-0000"
+            maxLength={13} // 000-0000-0000 형식의 최대 길이
+        />
+    );
+};
+
+
 // --- UI Components Placeholder ---
 const Card = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
     <div className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm ${className}`} {...props}>
@@ -281,7 +322,10 @@ const ProfileEditPanel = ({ isOpen, onClose, profileData, initialSkills, onSave 
             <div className="space-y-6">
                 <div><label className="text-sm font-medium block mb-2">이름</label><Input value={editedProfile.name} onChange={(e) => handleChange('name', e.target.value)} /></div>
                 <div><label className="text-sm font-medium block mb-2">이메일</label><Input type="email" value={editedProfile.email} onChange={(e) => handleChange('email', e.target.value)} /></div>
-                <div><label className="text-sm font-medium block mb-2">연락처</label><Input value={editedProfile.phone} onChange={(e) => handleChange('phone', e.target.value)} /></div>
+                <PhoneInput
+                    value={editedProfile.phone}
+                    onChange={(formattedPhone) => setEditedProfile(prev => ({ ...prev, phone: formattedPhone }))}
+                />
                 <div><label className="text-sm font-medium block mb-2">거주지</label><Input value={editedProfile.location} onChange={(e) => handleChange('location', e.target.value)} /></div>
                 <div><label className="text-sm font-medium block mb-2">경력</label><Input value={editedProfile.careerLevel} onChange={(e) => handleChange('careerLevel', e.target.value)} /></div>
                 <div><label className="text-sm font-medium block mb-2">직무</label><Input value={editedProfile.jobTitle} onChange={(e) => handleChange('jobTitle', e.target.value)} /></div>
