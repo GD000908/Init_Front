@@ -277,7 +277,22 @@ const GenericForm = ({ title, onSave, onClose, fields, initialData }: any) => {
                     {fields.map((field: any) => (
                         <div key={field.name} className="space-y-2">
                             <label className="text-sm font-medium">{field.label}</label>
-                            {field.name === 'description' ? <Textarea placeholder={field.placeholder} value={item[field.name] || ''} onChange={(e) => updateField(index, field.name, e.target.value)} className="min-h-[100px] w-full resize-y" /> : <Input type={field.type || 'text'} placeholder={field.placeholder} value={item[field.name] || ''} onChange={(e) => updateField(index, field.name, e.target.value)} />}
+                            {field.type === 'select' ? (
+                                <select
+                                    value={item[field.name] || ''}
+                                    onChange={(e) => updateField(index, field.name, e.target.value)}
+                                    className="flex h-12 w-full rounded-md border bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="" disabled>{field.placeholder || '선택하세요'}</option>
+                                    {field.options.map((option: string) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                            ) : field.name === 'description' ? (
+                                <Textarea placeholder={field.placeholder} value={item[field.name] || ''} onChange={(e) => updateField(index, field.name, e.target.value)} className="min-h-[100px] w-full resize-y" />
+                            ) : (
+                                <Input type={field.type || 'text'} placeholder={field.placeholder} value={item[field.name] || ''} onChange={(e) => updateField(index, field.name, e.target.value)} />
+                            )}
                         </div>
                     ))}
                 </div>
@@ -683,6 +698,15 @@ export default function SpecManagementView() {
                     setActiveSection(null);
                     break;
                 case 'military':
+                    for (const item of data) {
+                        // '군필' 또는 '복무중'일 때만 날짜를 필수로 체크합니다.
+                        const requiresDates = ['군필', '복무중'].includes(item.serviceType);
+
+                        if (requiresDates && (!item.startDate || !item.endDate)) {
+                            alert('병역 구분이 "군필" 또는 "복무중"인 경우, 입대일과 전역일을 모두 입력해야 합니다.');
+                            return; // 함수 실행을 중단하여 저장 요청을 보내지 않음
+                        }
+                    }
                     await api.updateMilitary(currentUserId, data);
                     setMilitary(data);
                     setActiveSection(null);
@@ -817,14 +841,55 @@ export default function SpecManagementView() {
 
     const sections = [
         { id: "work", title: "업무 경력", icon: <Briefcase className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />, data: workExperiences, fields: [{name: 'company', label: '회사명'}, {name: 'position', label: '직책'}, {name: 'startDate', label: '시작일', type: 'date'}, {name: 'endDate', label: '종료일', type: 'date'}, {name: 'description', label: '업무 내용'}]},
-        { id: "education", title: "학력", icon: <GraduationCap className="w-5 h-5 text-purple-600 dark:text-purple-400" />, data: educations, fields: [{name: 'school', label: '학교명'}, {name: 'major', label: '전공'}, {name: 'degree', label: '학위'}, {name: 'startDate', label: '입학일', type: 'date'}, {name: 'endDate', label: '졸업일', type: 'date'}] },
+        {
+            id: "education",
+            title: "학력",
+            icon: <GraduationCap className="w-5 h-5 text-purple-600 dark:text-purple-400" />,
+            data: educations,
+            fields: [
+                {name: 'school', label: '학교명', placeholder: '학교 이름을 입력하세요'},
+                {name: 'major', label: '전공', placeholder: '전공을 입력하세요'},
+                {
+                    name: 'degree',
+                    label: '학위',
+                    type: 'select', // 타입을 'select'로 변경
+                    placeholder: '학위를 선택하세요',
+                    options: ['해당없음', '전문학사', '학사', '석사', '박사', '전문석사', '전문박사'] // 드롭다운 목록 추가
+                },
+                {name: 'startDate', label: '입학일', type: 'date'},
+                {name: 'endDate', label: '졸업일', type: 'date'}
+            ]
+        },
         { id: "skills", title: "스킬", icon: <Code className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />, data: skills },
         { id: "certificates", title: "자격증", icon: <FileCheck className="w-5 h-5 text-amber-600 dark:text-amber-400" />, data: certificates, fields: [{name: 'name', label: '자격증명'}, {name: 'organization1', label: '발급기관'}, {name: 'acquisitionDate', label: '취득일', type: 'date'}] },
         { id: "projects", title: "프로젝트", icon: <Folder className="w-5 h-5 text-pink-600 dark:text-pink-400" />, data: projects, fields: [{name: 'name', label: '프로젝트명'}, {name: 'description', label: '설명'}, {name: 'startDate', label: '시작일', type: 'date'}, {name: 'endDate', label: '종료일', type: 'date'}] },
         { id: "activities", title: "활동 & 경험", icon: <Award className="w-5 h-5 text-orange-600 dark:text-orange-400" />, data: activities, fields: [{name: 'name', label: '활동명'}, {name: 'organization', label: '기관/단체명'}, {name: 'startDate', label: '시작일', type: 'date'}, {name: 'endDate', label: '종료일', type: 'date'}]},
         { id: "links", title: "링크", icon: <LinkIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />, data: links, fields: [{name: 'title', label: '링크 제목'}, {name: 'url', label: 'URL'}] },
         { id: "languages", title: "어학", icon: <Globe className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />, data: languages, fields: [{name: 'language', label: '언어'}, {name: 'level', label: '수준'}] },
-        { id: "military", title: "병역", icon: <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />, data: military, fields: [{name: 'serviceType', label: '병역 구분'}, {name: 'militaryBranch', label: '군별'}, {name: 'startDate', label: '입대일', type: 'date'}, {name: 'endDate', label: '전역일', type: 'date'}] },
+        {
+            id: "military",
+            title: "병역",
+            icon: <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />,
+            data: military,
+            fields: [
+                {
+                    name: 'serviceType',
+                    label: '병역 구분',
+                    type: 'select',
+                    placeholder: '병역 구분을 선택하세요',
+                    options: ['해당없음', '군필', '미필', '면제', '복무중']
+                },
+                {
+                    name: 'militaryBranch',
+                    label: '군별',
+                    type: 'select',
+                    placeholder: '군별을 선택하세요',
+                    options: ['육군', '해군', '공군', '해병대', '의무경찰', '의무소방', '사회복무요원', '산업기능요원', '기타']
+                },
+                {name: 'startDate', label: '입대일', type: 'date'},
+                {name: 'endDate', label: '전역일', type: 'date'}
+            ]
+        },
     ];
 
     const allDataForPdf = { profile, skills, workExperiences, educations, certificates, links, projects, activities };
