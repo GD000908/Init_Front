@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
-
+import EnhancedJobRecommendations from '@/components/EnhancedJobRecommendations'
 // API 기본 URL
 const API_BASE_URL = 'http://localhost:8080/api/home';
 
@@ -202,29 +202,29 @@ const api = {
     },
 
 // 🔥 updateApplicationsBatch 메서드도 URL 수정
-updateApplicationsBatch: async (userId: number, applications: ApplicationData[]): Promise<ApplicationData[]> => {
-    console.log('📤 지원현황 일괄 업데이트 API 호출:', {
-        userId,
-        count: applications.length
-    });
+    updateApplicationsBatch: async (userId: number, applications: ApplicationData[]): Promise<ApplicationData[]> => {
+        console.log('📤 지원현황 일괄 업데이트 API 호출:', {
+            userId,
+            count: applications.length
+        });
 
-    const response = await fetch(`${API_BASE_URL}/applications/batch/${userId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(applications)
-    });
+        const response = await fetch(`${API_BASE_URL}/applications/batch/${userId}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(applications)
+        });
 
-    await handleApiError(response);
-    const result = await response.json();
+        await handleApiError(response);
+        const result = await response.json();
 
-    console.log('✅ 지원현황 일괄 업데이트 응답:', {
-        userId,
-        requestCount: applications.length,
-        resultCount: result.length
-    });
+        console.log('✅ 지원현황 일괄 업데이트 응답:', {
+            userId,
+            requestCount: applications.length,
+            resultCount: result.length
+        });
 
-    return result;
-},
+        return result;
+    },
 
     // Stats
     getStats: async (userId: number): Promise<StatsData> => {
@@ -1101,20 +1101,44 @@ const Header = React.memo(({ userName }: { userName?: string }) => {
 });
 Header.displayName = "Header";
 
+// ✅ 수정된 Modal 컴포넌트
+// 범용적으로 사용할 수 있도록 내부에서 특정 컴포넌트를 렌더링하는 대신,
+// 'children' prop을 받아 그대로 표시하도록 수정했습니다.
 const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) => {
-    if (!isOpen) return null
+    if (!isOpen) return null;
+
+    // 모달 내용 클릭 시 닫히는 것을 방지하는 함수
+    const handleContentClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+    };
+
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]" onClick={onClose}>
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white dark:bg-gray-800/95 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 border border-gray-200 dark:border-gray-700" onClick={(e) => e.stopPropagation()}>
+        <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]"
+            onClick={onClose} // 배경 클릭 시 모달 닫기
+        >
+            <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg m-4"
+                onClick={handleContentClick} // 컨텐츠 영역 클릭 이벤트 전파 방지
+            >
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{title}</h3>
-                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full" onClick={onClose}><X className="w-4 h-4" /></Button>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+                    <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8">
+                        <X className="w-5 h-5" />
+                    </Button>
                 </div>
-                <div className="p-6">{children}</div>
+                <div className="p-6">
+                    {children}
+                </div>
             </motion.div>
         </div>
-    )
-}
+    );
+};
+
 
 const ProfileEditModal = ({ isOpen, onClose, profileData, onSave }: { isOpen: boolean, onClose: () => void, profileData: ProfileData, onSave: (data: ProfileData) => void }) => {
     const [data, setData] = useState(profileData);
@@ -1666,7 +1690,11 @@ export default function CareerLogHomePage() {
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }}>
-                        <JobRecommendations conditions={conditionsData} onRefresh={() => {}} userId={Number(userId)} />
+                        <EnhancedJobRecommendations
+                            conditions={conditionsData}
+                            userId={Number(userId)}
+                            isParentLoading={loading}
+                        />
                     </motion.div>
 
                 </div>

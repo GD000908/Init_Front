@@ -1,5 +1,5 @@
 // lib/dash-api.ts
-// 홈 대시보드 페이지 API 클라이언트
+// 홈 대시보드 페이지 API 클라이언트 (공고 검색 기능 추가)
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
@@ -95,6 +95,41 @@ export interface JobRecommendation {
     recruitCount?: string;
 }
 
+// 🔥 공고 검색 관련 타입 추가
+export interface PublicJobPosting {
+    recrutPblntSn: string
+    instNm: string
+    recrutPbancTtl: string
+    recrutSeNm: string
+    hireTypeNmLst: string
+    workRgnNmLst: string
+    acbgCondNmLst: string
+    pbancBgngYmd: string
+    pbancEndYmd: string
+    srcUrl: string
+    recrutNope: number
+    aplyQlfcCn: string
+    decimalDay: number
+}
+
+export interface PublicJobSearchRequest {
+    keywords?: string[]
+    locations?: string[]
+    pageNo?: number
+    numOfRows?: number
+    hireTypeLst?: string[]
+    recrutSe?: string
+    acbgCondLst?: string[]
+    ncsCdLst?: string[]
+}
+
+export interface PublicJobSearchResponse {
+    resultCode: number
+    resultMsg: string
+    totalCount: number
+    result: PublicJobPosting[]
+}
+
 // 백엔드 응답 타입 (enum 형태)
 export type ApplicationStatusEnum = 'APPLIED' | 'DOCUMENT_PASSED' | 'FINAL_PASSED' | 'REJECTED';
 
@@ -156,7 +191,7 @@ const apiRequest = async <T>(url: string, options: RequestInit = {}): Promise<T>
         }
 
         // 🔥 공고 추천 API는 ApiResponse 래퍼 없이 직접 배열을 반환하므로 분기 처리
-        if (url.includes('/job-recommendations/')) {
+        if (url.includes('/job-recommendations/') || url.includes('/public-jobs/')) {
             return await response.json();
         }
 
@@ -425,7 +460,6 @@ export const updateApplications = async (applications: ApplicationData[]): Promi
     }
 };
 
-
 // =============================================================================
 // 통계 데이터 관련 API
 // =============================================================================
@@ -449,11 +483,7 @@ export const getProfileCompletion = async (): Promise<ProfileCompletion> => {
 };
 
 // =============================================================================
-// 할일 목록 관련 API
-// =============================================================================
-
-// =============================================================================
-// 🔥 공고 추천 관련 API (새로 추가)
+// 🔥 공고 추천 관련 API
 // =============================================================================
 
 /**
@@ -488,6 +518,49 @@ export const getJobRecommendations = async (
         throw error;
     }
 };
+
+// =============================================================================
+// 🔥 공고 검색 관련 API (새로 추가)
+// =============================================================================
+
+/**
+ * 공공데이터포털 채용정보 검색
+ */
+export const searchPublicJobs = async (
+    searchParams: PublicJobSearchRequest
+): Promise<PublicJobSearchResponse> => {
+    const config = createApiClient()
+
+    try {
+        console.log('📡 공공데이터 채용정보 검색 요청:', searchParams);
+
+        const response = await fetch(`${API_BASE_URL}/api/public-jobs/search`, {
+            method: 'POST',
+            ...config,
+            headers: {
+                ...config.headers,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(searchParams)
+        })
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const result = await response.json()
+        console.log('✅ 공공데이터 채용정보 검색 성공:', {
+            totalCount: result.totalCount,
+            resultCount: result.result?.length || 0
+        });
+
+        return result
+
+    } catch (error) {
+        console.error('❌ 공고 검색 API 실패:', error)
+        throw error
+    }
+}
 
 // =============================================================================
 // 유틸리티 함수들
@@ -588,6 +661,79 @@ export const transformApplicationsForBackend = (frontendApplications: Applicatio
 };
 
 // =============================================================================
+// 🔥 검색 필터 옵션들
+// =============================================================================
+
+export const JOB_SEARCH_FILTERS = {
+    regions: [
+        { code: "101000", name: "서울" },
+        { code: "102000", name: "부산" },
+        { code: "103000", name: "대구" },
+        { code: "104000", name: "인천" },
+        { code: "105000", name: "광주" },
+        { code: "106000", name: "대전" },
+        { code: "107000", name: "울산" },
+        { code: "108000", name: "세종" },
+        { code: "109000", name: "경기" },
+        { code: "110000", name: "강원" },
+        { code: "111000", name: "충북" },
+        { code: "112000", name: "충남" },
+        { code: "113000", name: "전북" },
+        { code: "114000", name: "전남" },
+        { code: "115000", name: "경북" },
+        { code: "116000", name: "경남" },
+        { code: "117000", name: "제주" }
+    ],
+    employmentTypes: [
+        { code: "R1010", name: "정규직" },
+        { code: "R1020", name: "무기계약직" },
+        { code: "R1030", name: "기간제" },
+        { code: "R1040", name: "비정규직" },
+        { code: "R1050", name: "기타" }
+    ],
+    recruitmentTypes: [
+        { code: "R2010", name: "신입" },
+        { code: "R2020", name: "경력" },
+        { code: "R2030", name: "인턴" },
+        { code: "R2040", name: "기타" }
+    ],
+    educationLevels: [
+        { code: "R7010", name: "학력무관" },
+        { code: "R7020", name: "고등학교졸업" },
+        { code: "R7030", name: "대학교졸업(2,3년)" },
+        { code: "R7040", name: "대학교졸업(4년)" },
+        { code: "R7050", name: "대학원졸업(석사)" },
+        { code: "R7060", name: "대학원졸업(박사)" }
+    ],
+    ncsClassifications: [
+        { code: "01", name: "사업관리" },
+        { code: "02", name: "경영·회계·사무" },
+        { code: "03", name: "금융·보험" },
+        { code: "04", name: "교육·자연·사회과학" },
+        { code: "05", name: "법률·경찰·소방·교도·국방" },
+        { code: "06", name: "보건·의료" },
+        { code: "07", name: "사회복지·종교" },
+        { code: "08", name: "문화·예술·디자인·방송" },
+        { code: "09", name: "운전·운송" },
+        { code: "10", name: "영업판매" },
+        { code: "11", name: "경비·청소" },
+        { code: "12", name: "이용·숙박·여행·오락·스포츠" },
+        { code: "13", name: "음식서비스" },
+        { code: "14", name: "건설" },
+        { code: "15", name: "기계" },
+        { code: "16", name: "재료" },
+        { code: "17", name: "화학" },
+        { code: "18", name: "섬유·의복" },
+        { code: "19", name: "전기·전자" },
+        { code: "20", name: "정보통신" },
+        { code: "21", name: "식품가공" },
+        { code: "22", name: "인쇄·목재·가구·공예" },
+        { code: "23", name: "환경·에너지·안전" },
+        { code: "24", name: "농림어업" }
+    ]
+};
+
+// =============================================================================
 // React Query용 쿼리 키들 (선택사항)
 // =============================================================================
 
@@ -599,7 +745,8 @@ export const QUERY_KEYS = {
     stats: ['stats'] as const,
     completion: ['completion'] as const,
     todos: ['todos'] as const,
-    jobRecommendations: ['jobRecommendations'] as const, // 🔥 추가
+    jobRecommendations: ['jobRecommendations'] as const,
+    publicJobSearch: ['publicJobSearch'] as const, // 🔥 추가
 } as const;
 
 // =============================================================================
@@ -699,8 +846,8 @@ export const api = {
     updateApplications,
     getHomeStats,
     getProfileCompletion,
-
-
-    // 🔥 공고 추천 API 추가
     getJobRecommendations,
+
+    // 🔥 새로운 공고 검색 API 추가
+    searchPublicJobs,
 };
