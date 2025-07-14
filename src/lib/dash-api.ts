@@ -190,20 +190,89 @@ export const getDashboardData = async (): Promise<DashboardData> => {
 // =============================================================================
 
 /**
+ * 사용자 ID 가져오기 헬퍼 함수
+ */
+const getUserId = (): string => {
+    if (typeof window === 'undefined') return '1'; // SSR 환경
+    return localStorage.getItem('userId') || '1';
+};
+
+/**
  * 프로필 데이터 조회
  */
 export const getProfileData = async (): Promise<ProfileData> => {
-    return await apiRequest<ProfileData>('/api/home/profile');
+    const userId = getUserId();
+    console.log('🔍 프로필 조회 API 호출:', userId);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/home/profile/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ 프로필 조회 성공:', data);
+
+        // 백엔드 응답을 프론트엔드 형식으로 변환
+        return {
+            name: data.name || '',
+            email: data.email || '',
+            career: data.careerType || '신입',
+            job: data.jobTitle || ''
+        };
+    } catch (error) {
+        console.error('❌ 프로필 조회 실패:', error);
+        throw error;
+    }
 };
 
 /**
  * 프로필 데이터 저장
  */
 export const updateProfileData = async (profileData: ProfileData): Promise<void> => {
-    await apiRequest<void>('/api/home/profile', {
-        method: 'PUT',
-        body: JSON.stringify(profileData),
-    });
+    const userId = getUserId();
+    console.log('💾 프로필 저장 API 호출:', { userId, profileData });
+
+    try {
+        // 프론트엔드 데이터를 백엔드 형식으로 변환
+        const backendData = {
+            name: profileData.name,
+            email: profileData.email,
+            careerType: profileData.career,
+            jobTitle: profileData.job,
+            matching: true // 기본값
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/home/profile/${userId}`, {
+            method: 'POST', // 백엔드는 POST 메서드 사용
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`
+            },
+            credentials: 'include',
+            body: JSON.stringify(backendData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ 프로필 저장 실패 응답:', errorText);
+            throw new Error(`프로필 저장 실패: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ 프로필 저장 성공:', result);
+    } catch (error) {
+        console.error('❌ 프로필 저장 실패:', error);
+        throw error;
+    }
 };
 
 // =============================================================================
@@ -214,17 +283,68 @@ export const updateProfileData = async (profileData: ProfileData): Promise<void>
  * 희망 조건 데이터 조회
  */
 export const getDesiredConditions = async (): Promise<ConditionsData> => {
-    return await apiRequest<ConditionsData>('/api/home/conditions');
+    const userId = getUserId();
+    console.log('🔍 희망조건 조회 API 호출:', userId);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/home/conditions/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ 희망조건 조회 성공:', data);
+
+        return {
+            jobs: data.jobs || [],
+            locations: data.locations || [],
+            salary: data.salary || '0',
+            others: data.others || []
+        };
+    } catch (error) {
+        console.error('❌ 희망조건 조회 실패:', error);
+        throw error;
+    }
 };
 
 /**
  * 희망 조건 데이터 저장
  */
 export const updateDesiredConditions = async (conditionsData: ConditionsData): Promise<void> => {
-    await apiRequest<void>('/api/home/conditions', {
-        method: 'PUT',
-        body: JSON.stringify(conditionsData),
-    });
+    const userId = getUserId();
+    console.log('💾 희망조건 저장 API 호출:', { userId, conditionsData });
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/home/conditions/${userId}`, {
+            method: 'POST', // 백엔드는 POST 메서드 사용
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`
+            },
+            credentials: 'include',
+            body: JSON.stringify(conditionsData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ 희망조건 저장 실패 응답:', errorText);
+            throw new Error(`희망조건 저장 실패: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ 희망조건 저장 성공:', result);
+    } catch (error) {
+        console.error('❌ 희망조건 저장 실패:', error);
+        throw error;
+    }
 };
 
 // =============================================================================
@@ -235,23 +355,76 @@ export const updateDesiredConditions = async (conditionsData: ConditionsData): P
  * 지원 현황 데이터 조회
  */
 export const getApplications = async (): Promise<ApplicationData[]> => {
-    const backendData = await apiRequest<BackendApplicationData[]>('/api/home/applications');
-    return backendData.map(app => ({
-        ...app,
-        status: getStatusDisplayName(app.status)
-    }));
+    const userId = getUserId();
+    console.log('🔍 지원현황 조회 API 호출:', userId);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/home/applications/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ 지원현황 조회 성공:', data);
+
+        return data.map((app: any) => ({
+            id: app.id,
+            company: app.company,
+            category: app.category,
+            status: app.status // 백엔드에서 이미 한글로 변환되어 옴
+        }));
+    } catch (error) {
+        console.error('❌ 지원현황 조회 실패:', error);
+        throw error;
+    }
 };
 
 /**
  * 지원 현황 데이터 저장
  */
 export const updateApplications = async (applications: ApplicationData[]): Promise<void> => {
-    const backendData = transformApplicationsForBackend(applications);
-    await apiRequest<void>('/api/home/applications', {
-        method: 'PUT',
-        body: JSON.stringify(backendData),
-    });
+    console.log('💾 지원현황 저장 API 호출:', applications);
+
+    try {
+        // 백엔드는 batch update를 사용하고 userId를 각 항목에 포함해야 함
+        const userId = parseInt(getUserId());
+        const applicationsWithUserId = applications.map(app => ({
+            ...app,
+            userId: userId
+        }));
+
+        const response = await fetch(`${API_BASE_URL}/api/home/applications/batch`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`
+            },
+            credentials: 'include',
+            body: JSON.stringify(applicationsWithUserId)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ 지원현황 저장 실패 응답:', errorText);
+            throw new Error(`지원현황 저장 실패: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ 지원현황 저장 성공:', result);
+    } catch (error) {
+        console.error('❌ 지원현황 저장 실패:', error);
+        throw error;
+    }
 };
+
 
 // =============================================================================
 // 통계 데이터 관련 API

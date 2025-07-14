@@ -8,7 +8,7 @@ import {
     User, Edit, Plus, X, ChevronDown,
     Target, CheckCircle,
     AlertCircle, Star, Edit2, Loader2,
-    PieChart as PieChartIcon, TrendingUp, Briefcase, Check, ArrowRight,
+    PieChart as PieChartIcon, TrendingUp, Briefcase, ArrowRight,
     Award, Camera, Link, Languages, GraduationCap, Trash2,
     Building, ExternalLink, RefreshCw, Shield
 } from "lucide-react"
@@ -115,8 +115,14 @@ const getAuthHeaders = () => {
 
 // 에러 처리 헬퍼
 const handleApiError = async (response: Response) => {
+    console.log('🔍 API 응답 상태 확인:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+    });
+
     if (response.status === 401) {
-        // 토큰 만료 시 로그인 페이지로 리다이렉트
+        console.log('🚫 인증 만료, 로그인 페이지로 이동');
         localStorage.removeItem('authToken');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userId');
@@ -124,9 +130,26 @@ const handleApiError = async (response: Response) => {
         window.location.href = '/login';
         throw new Error('Authentication failed');
     }
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+    // 🔥 200-299 범위는 성공으로 처리
+    if (response.ok) {
+        console.log('✅ API 응답 성공');
+        return; // 성공 시 그냥 리턴
     }
+
+    // 실제 에러인 경우에만 에러 처리
+    let errorMessage = `HTTP error! status: ${response.status}`;
+    try {
+        const errorText = await response.text();
+        if (errorText) {
+            errorMessage = errorText;
+        }
+    } catch (e) {
+        console.warn('에러 메시지 파싱 실패:', e);
+    }
+
+    console.error('❌ API 에러:', errorMessage);
+    throw new Error(errorMessage);
 };
 
 // API 함수들 (JWT 인증 적용)
@@ -178,15 +201,30 @@ const api = {
         return response.json();
     },
 
-    updateApplicationsBatch: async (applications: ApplicationData[]): Promise<ApplicationData[]> => {
-        const response = await fetch(`${API_BASE_URL}/applications/batch`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(applications)
-        });
-        await handleApiError(response);
-        return response.json();
-    },
+// 🔥 updateApplicationsBatch 메서드도 URL 수정
+updateApplicationsBatch: async (userId: number, applications: ApplicationData[]): Promise<ApplicationData[]> => {
+    console.log('📤 지원현황 일괄 업데이트 API 호출:', {
+        userId,
+        count: applications.length
+    });
+
+    const response = await fetch(`${API_BASE_URL}/applications/batch/${userId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(applications)
+    });
+
+    await handleApiError(response);
+    const result = await response.json();
+
+    console.log('✅ 지원현황 일괄 업데이트 응답:', {
+        userId,
+        requestCount: applications.length,
+        resultCount: result.length
+    });
+
+    return result;
+},
 
     // Stats
     getStats: async (userId: number): Promise<StatsData> => {
@@ -866,12 +904,39 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
     const [chartView, setChartView] = useState<"pie" | "interest">("pie")
 
     const StatusChart = React.memo(() => {
+        // 🔥 빈 배열 체크 추가
+        if (!applications || applications.length === 0) {
+            return (
+                <div className="h-[350px] w-full flex flex-col items-center justify-center">
+                    <div className="text-gray-400 mb-4">
+                        <PieChartIcon className="w-16 h-16 mx-auto mb-2" />
+                        <p className="text-center">지원 현황이 없습니다</p>
+                        <p className="text-sm text-center mt-1">지원 현황을 추가해보세요!</p>
+                    </div>
+                </div>
+            );
+        }
+
         const data = [
             { name: "지원 완료", value: applications.filter(a=>a.status === '지원 완료').length, color: "#6366f1" },
             { name: "서류 합격", value: applications.filter(a=>a.status === '서류 합격').length, color: "#8b5cf6" },
             { name: "최종 합격", value: applications.filter(a=>a.status === '최종 합격').length, color: "#10b981" },
             { name: "불합격", value: applications.filter(a=>a.status === '불합격').length, color: "#f43f5e" }
         ].filter(d => d.value > 0);
+
+        // 🔥 모든 값이 0인 경우 처리
+        if (data.length === 0) {
+            return (
+                <div className="h-[350px] w-full flex flex-col items-center justify-center">
+                    <div className="text-gray-400 mb-4">
+                        <PieChartIcon className="w-16 h-16 mx-auto mb-2" />
+                        <p className="text-center">지원 현황이 없습니다</p>
+                        <p className="text-sm text-center mt-1">지원 현황을 추가해보세요!</p>
+                    </div>
+                </div>
+            );
+        }
+
         const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
             const RADIAN = Math.PI / 180;
             const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -880,6 +945,7 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
             if (percent < 0.1) return null;
             return (<text x={x} y={y} fill="white" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" className="text-xs font-bold drop-shadow-md">{`${(percent * 100).toFixed(0)}%`}</text>);
         };
+
         return (
             <div className="h-[350px] w-full">
                 <ResponsiveContainer width="100%" height={300}>
@@ -890,13 +956,35 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
                         <Tooltip content={({ active, payload }) => { if (active && payload && payload.length) { return (<div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"><p className="text-sm font-semibold">{`${payload[0].name}: ${payload[0].value}개`}</p></div>) } return null }} />
                     </PieChart>
                 </ResponsiveContainer>
-                <div className="flex justify-center mt-4"><div className="flex flex-wrap justify-center gap-4">{data.map((entry, index) => (<div key={`legend-${index}`} className="flex items-center"><div className="w-3 h-3 rounded-full mr-2 shadow-sm" style={{ backgroundColor: entry.color }} /><span className="text-xs font-medium text-gray-600 dark:text-gray-400">{entry.name}</span></div>))}</div></div>
+                <div className="flex justify-center mt-4">
+                    <div className="flex flex-wrap justify-center gap-4">
+                        {data.map((entry, index) => (
+                            <div key={`legend-${index}`} className="flex items-center">
+                                <div className="w-3 h-3 rounded-full mr-2 shadow-sm" style={{ backgroundColor: entry.color }} />
+                                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{entry.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         )
     })
     StatusChart.displayName = "StatusChart";
 
     const InterestChart = React.memo(({data}: {data: ApplicationData[]}) => {
+        // 🔥 빈 배열 체크 추가
+        if (!data || data.length === 0) {
+            return (
+                <div className="h-[350px] w-full flex flex-col items-center justify-center">
+                    <div className="text-gray-400 mb-4">
+                        <TrendingUp className="w-16 h-16 mx-auto mb-2" />
+                        <p className="text-center">관심 직무 데이터가 없습니다</p>
+                        <p className="text-sm text-center mt-1">지원 현황을 추가해보세요!</p>
+                    </div>
+                </div>
+            );
+        }
+
         const categoryCounts = data.reduce((acc, app) => {
             acc[app.category] = (acc[app.category] || 0) + 1;
             return acc;
@@ -906,6 +994,19 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
             name: key,
             지원수: categoryCounts[key],
         })).sort((a, b) => b.지원수 - a.지원수);
+
+        // 🔥 차트 데이터가 없는 경우 처리
+        if (chartData.length === 0) {
+            return (
+                <div className="h-[350px] w-full flex flex-col items-center justify-center">
+                    <div className="text-gray-400 mb-4">
+                        <TrendingUp className="w-16 h-16 mx-auto mb-2" />
+                        <p className="text-center">관심 직무 데이터가 없습니다</p>
+                        <p className="text-sm text-center mt-1">지원 현황을 추가해보세요!</p>
+                    </div>
+                </div>
+            );
+        }
 
         return (
             <div className="h-[350px] w-full">
@@ -929,14 +1030,56 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
             <div className="p-4 border-b border-gray-100 dark:border-gray-800/50 flex justify-between items-center">
                 <h3 className="text-base font-bold text-gray-800 dark:text-gray-200">지원 현황 분석</h3>
                 <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-                    <Button variant={chartView === "pie" ? "secondary" : "ghost"} size="sm" onClick={() => setChartView("pie")} className={cn(chartView === "pie" ? "bg-white dark:bg-gray-700 shadow-sm" : "", "transition-all duration-200")}><PieChartIcon className="w-4 h-4 mr-1" /><span>지원 현황</span></Button>
-                    <Button variant={chartView === "interest" ? "secondary" : "ghost"} size="sm" onClick={() => setChartView("interest")} className={cn(chartView === "interest" ? "bg-white dark:bg-gray-700 shadow-sm" : "", "transition-all duration-200")}><TrendingUp className="w-4 h-4 mr-1" /><span>관심 직무</span></Button>
+                    <Button
+                        variant={chartView === "pie" ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={() => setChartView("pie")}
+                        className={cn(
+                            chartView === "pie" ? "bg-white dark:bg-gray-700 shadow-sm" : "",
+                            "transition-all duration-200"
+                        )}
+                    >
+                        <PieChartIcon className="w-4 h-4 mr-1" />
+                        <span>지원 현황</span>
+                    </Button>
+                    <Button
+                        variant={chartView === "interest" ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={() => setChartView("interest")}
+                        className={cn(
+                            chartView === "interest" ? "bg-white dark:bg-gray-700 shadow-sm" : "",
+                            "transition-all duration-200"
+                        )}
+                    >
+                        <TrendingUp className="w-4 h-4 mr-1" />
+                        <span>관심 직무</span>
+                    </Button>
                 </div>
             </div>
             <div className="p-6">
                 <AnimatePresence mode="wait">
-                    {chartView === "pie" && (<motion.div key="pie" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}><StatusChart /></motion.div>)}
-                    {chartView === "interest" && (<motion.div key="interest" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}><InterestChart data={applications} /></motion.div>)}
+                    {chartView === "pie" && (
+                        <motion.div
+                            key="pie"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <StatusChart />
+                        </motion.div>
+                    )}
+                    {chartView === "interest" && (
+                        <motion.div
+                            key="interest"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <InterestChart data={applications} />
+                        </motion.div>
+                    )}
                 </AnimatePresence>
             </div>
         </Card>
@@ -1122,16 +1265,23 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
     )
 }
 
-const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId }: { isOpen: boolean, onClose: () => void, applications: ApplicationData[], onSave: (data: ApplicationData[]) => void, userId: number }) => {
+const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId }: {
+    isOpen: boolean,
+    onClose: () => void,
+    applications: ApplicationData[],
+    onSave: (data: ApplicationData[]) => void,
+    userId: number
+}) => {
     const [apps, setApps] = useState<ApplicationData[]>([])
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         setApps(applications.map(app => ({
             ...app,
+            userId: userId, // 🔥 userId 확실히 설정
             deadline: app.deadline ? app.deadline.split('T')[0] : ''
         })));
-    }, [isOpen, applications])
+    }, [isOpen, applications, userId]) // 🔥 userId 의존성 추가
 
     const handleAdd = () => {
         const tomorrow = new Date();
@@ -1141,7 +1291,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
             company: "새로운 회사",
             category: "직무 선택",
             status: '지원 완료',
-            userId,
+            userId: userId, // 🔥 userId 확실히 설정
             deadline: tomorrow.toISOString().split('T')[0]
         };
         setApps([newApp, ...apps]);
@@ -1152,17 +1302,60 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
     }
 
     const handleUpdate = (id: number, field: keyof ApplicationData, value: string) => {
-        setApps(apps.map(app => app.id === id ? { ...app, [field]: value } : app));
+        setApps(apps.map(app => app.id === id ? {
+            ...app,
+            [field]: value,
+            userId: userId // 🔥 업데이트 시에도 userId 유지
+        } : app));
     }
+
+    // ApplicationStatusModal 컴포넌트 내부의 handleSave 함수 수정
 
     const handleSave = async () => {
         try {
             setIsLoading(true);
-            const updated = await api.updateApplicationsBatch(apps.map(app => ({ ...app, userId })));
+
+            // 🔥 모든 앱에 userId가 설정되어 있는지 확인
+            const appsWithUserId = apps.map(app => ({
+                ...app,
+                userId: userId // 🔥 저장 직전에도 userId 확실히 설정
+            }));
+
+            console.log('📤 ApplicationStatusModal에서 저장 시도:', {
+                userId,
+                totalApps: appsWithUserId.length,
+                apps: appsWithUserId
+            });
+
+            // 🔥 userId를 명시적으로 전달하는 새로운 API 호출
+            const response = await fetch(`${API_BASE_URL}/applications/batch/${userId}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(appsWithUserId)
+            });
+
+            await handleApiError(response);
+            const updated = await response.json();
+
+            console.log('✅ ApplicationStatusModal 저장 완료:', {
+                userId,
+                requestCount: appsWithUserId.length,
+                resultCount: updated.length,
+                updated
+            });
+
             onSave(updated);
             onClose();
+
+            // 🔥 성공 메시지 표시
+            if (appsWithUserId.length === 0) {
+                alert('모든 지원현황이 삭제되었습니다.');
+            } else {
+                alert(`지원현황이 성공적으로 저장되었습니다! (${updated.length}개)`);
+            }
+
         } catch (error) {
-            console.error('Failed to update applications:', error);
+            console.error('❌ ApplicationStatusModal 저장 실패:', error);
             alert('지원 현황 수정에 실패했습니다. 다시 시도해주세요.');
         } finally {
             setIsLoading(false);
@@ -1175,56 +1368,65 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                 <Button onClick={handleAdd} className="w-full shadow-sm" disabled={isLoading}>
                     <Plus className="w-4 h-4 mr-2" />새 지원내역 추가
                 </Button>
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-2 -mr-2">
-                    {apps.map(app => (
-                        <div key={app.id} className="grid grid-cols-12 gap-2 items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div className="col-span-3">
-                                <Input
-                                    placeholder="회사명"
-                                    value={app.company}
-                                    onChange={e => handleUpdate(app.id, 'company', e.target.value)}
-                                />
+
+                {/* 🔥 0개일 때도 안전하게 처리 */}
+                {apps.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                        <p>등록된 지원내역이 없습니다.</p>
+                        <p className="text-sm mt-1">위의 버튼을 클릭해서 지원내역을 추가해보세요.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2 -mr-2">
+                        {apps.map(app => (
+                            <div key={app.id} className="grid grid-cols-12 gap-2 items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <div className="col-span-3">
+                                    <Input
+                                        placeholder="회사명"
+                                        value={app.company}
+                                        onChange={e => handleUpdate(app.id, 'company', e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-span-3">
+                                    <Input
+                                        placeholder="직무"
+                                        value={app.category}
+                                        onChange={e => handleUpdate(app.id, 'category', e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-span-3">
+                                    <Input
+                                        type="date"
+                                        value={app.deadline}
+                                        onChange={e => handleUpdate(app.id, 'deadline', e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-span-2">
+                                    <Select
+                                        value={app.status}
+                                        onChange={e => handleUpdate(app.id, 'status', e.target.value)}
+                                        className="h-10 text-sm"
+                                    >
+                                        <option value="지원 완료">지원 완료</option>
+                                        <option value="서류 합격">서류 합격</option>
+                                        <option value="최종 합격">최종 합격</option>
+                                        <option value="불합격">불합격</option>
+                                    </Select>
+                                </div>
+                                <div className="col-span-1 text-right">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="w-8 h-8 rounded-full"
+                                        onClick={() => handleRemove(app.id)}
+                                        disabled={isLoading}
+                                    >
+                                        <Trash2 className="w-4 h-4 text-red-500"/>
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="col-span-3">
-                                <Input
-                                    placeholder="직무"
-                                    value={app.category}
-                                    onChange={e => handleUpdate(app.id, 'category', e.target.value)}
-                                />
-                            </div>
-                            <div className="col-span-3">
-                                <Input
-                                    type="date"
-                                    value={app.deadline}
-                                    onChange={e => handleUpdate(app.id, 'deadline', e.target.value)}
-                                />
-                            </div>
-                            <div className="col-span-2">
-                                <Select
-                                    value={app.status}
-                                    onChange={e => handleUpdate(app.id, 'status', e.target.value)}
-                                    className="h-10 text-sm"
-                                >
-                                    <option value="지원 완료">지원 완료</option>
-                                    <option value="서류 합격">서류 합격</option>
-                                    <option value="최종 합격">최종 합격</option>
-                                    <option value="불합격">불합격</option>
-                                </Select>
-                            </div>
-                            <div className="col-span-1 text-right">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="w-8 h-8 rounded-full"
-                                    onClick={() => handleRemove(app.id)}
-                                    disabled={isLoading}
-                                >
-                                    <Trash2 className="w-4 h-4 text-red-500"/>
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
             <div className="flex gap-3 mt-8 justify-end">
                 <Button variant="outline" onClick={onClose} disabled={isLoading}>취소</Button>
@@ -1246,11 +1448,17 @@ export default function CareerLogHomePage() {
     const [conditionsData, setConditionsData] = useState<ConditionsData | null>(null);
     const [applicationData, setApplicationData] = useState<ApplicationData[]>([]);
     const [stats, setStats] = useState<StatsData | null>(null);
+
     const [loading, setLoading] = useState(true);
 
     const [isProfileEditOpen, setIsProfileEditOpen] = useState(false)
     const [isConditionsEditOpen, setIsConditionsEditOpen] = useState(false)
     const [isApplicationStatusOpen, setIsApplicationStatusOpen] = useState(false);
+
+// 🔥 추가: 각각의 저장 작업을 위한 로딩 상태
+    const [setIsProfileLoading] = useState(false);
+    const [setIsConditionsLoading] = useState(false);
+    //const [isApplicationsLoading, setIsApplicationsLoading] = useState(false);
 
     // 인증 체크
     useEffect(() => {
@@ -1304,26 +1512,8 @@ export default function CareerLogHomePage() {
                 userId: Number(userId)
             });
 
-            // 지원 현황 데이터 설정
-            if (allData.applications && allData.applications.length > 0) {
-                setApplicationData(allData.applications);
-            } else {
-                // 데모 데이터 생성
-                const getDemoDate = (days: number) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() + days);
-                    return date.toISOString().split('T')[0];
-                };
-
-                const demoApplications = [
-                    { id: 1, company: "네이버", category: "프론트엔드 개발", status: "지원 완료", deadline: getDemoDate(2), userId: Number(userId) },
-                    { id: 2, company: "카카오", category: "백엔드 개발", status: "지원 완료", deadline: getDemoDate(6), userId: Number(userId) },
-                    { id: 3, company: "라인", category: "iOS 개발", status: "서류 합격", deadline: getDemoDate(15), userId: Number(userId) },
-                    { id: 4, company: "쿠팡", category: "데이터 분석", status: "불합격", deadline: getDemoDate(-10), userId: Number(userId) },
-                    { id: 5, company: "토스", category: "서버 개발", status: "최종 합격", deadline: getDemoDate(-20), userId: Number(userId) },
-                ];
-                setApplicationData(demoApplications);
-            }
+            // 🔥 지원 현황 데이터 설정 - 목업 데이터 제거, 빈 배열로 시작
+            setApplicationData(allData.applications || []);
 
             setStats(allData.stats);
 
@@ -1346,6 +1536,7 @@ export default function CareerLogHomePage() {
                 others: [],
                 userId: Number(userId)
             });
+            // 🔥 에러 시에도 빈 배열로 설정 (목업 데이터 없음)
             setApplicationData([]);
             setStats(null);
         } finally {
@@ -1359,29 +1550,44 @@ export default function CareerLogHomePage() {
         }
     }, [userId, isAuthenticated, authLoading, userName]);
 
-    const handleProfileSave = (newData: ProfileData) => {
-        setProfileData(newData);
+    // 🔥 handleProfileSave 함수 수정 (메인 컴포넌트 내부)
+    const handleProfileSave = async (newData: ProfileData) => {
+        try {
+            console.log('🔄 프로필 저장 시작:', newData);
+
+            const updatedProfile = await api.updateProfile(Number(userId), newData);
+            setProfileData(updatedProfile);
+
+            console.log('✅ 프로필 저장 및 상태 업데이트 완료:', updatedProfile);
+            alert('프로필이 성공적으로 저장되었습니다!');
+
+        } catch (error) {
+            console.error('❌ 프로필 저장 실패:', error);
+            alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
+        }
     };
 
-    const handleConditionsSave = async (conditionsData: ConditionsData) => {
+    // 🔥 handleConditionsSave 함수 수정 (메인 컴포넌트 내부)
+    const handleConditionsSave = async (newConditionsData: ConditionsData) => {
         try {
-            setIsLoading(true);
+            console.log('🔄 희망조건 저장 시작:', newConditionsData);
 
-            // 🔥 jobs가 비어있을 때 UserProfile의 jobTitle을 기본값으로 설정
-            if ((!conditionsData.jobs || conditionsData.jobs.length === 0) &&
+            if ((!newConditionsData.jobs || newConditionsData.jobs.length === 0) &&
                 profileData?.jobTitle &&
                 profileData.jobTitle.trim() !== '') {
-                conditionsData.jobs = [profileData.jobTitle];
+                newConditionsData.jobs = [profileData.jobTitle];
+                console.log('🔧 빈 jobs에 기본 직무 설정:', newConditionsData.jobs);
             }
 
-            const updated = await api.updateConditions(conditionsData.userId, conditionsData);
-            setConditionsData(updated);
-            setIsConditionsEditOpen(false);
+            const updatedConditions = await api.updateConditions(Number(userId), newConditionsData);
+            setConditionsData(updatedConditions);
+
+            console.log('✅ 희망조건 저장 및 상태 업데이트 완료:', updatedConditions);
+            alert('희망 조건이 성공적으로 저장되었습니다!');
+
         } catch (error) {
-            console.error('Failed to update conditions:', error);
-            alert('희망 조건 수정에 실패했습니다.');
-        } finally {
-            setIsLoading(false);
+            console.error('❌ 희망조건 저장 실패:', error);
+            alert('희망 조건 저장에 실패했습니다. 다시 시도해주세요.');
         }
     };
 

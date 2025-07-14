@@ -21,7 +21,12 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "docx": "^8.5.0",
+    "file-saver": "^2.0.5",
     "framer-motion": "^12.23.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.517.0",
     "next": "15.3.3",
     "postcss": "^8.5.6",
@@ -32,20 +37,16 @@
     "recharts": "^3.0.2",
     "styled-jsx": "^5.1.7",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^3.4.17",
-    "jspdf": "^2.5.1",
-    "html2canvas": "^1.4.1",
-    "docx": "^8.5.0",
-    "file-saver": "^2.0.5"
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "typescript": "^5",
-    "@types/file-saver": "^2.0.7"
+    "typescript": "^5"
   }
 }

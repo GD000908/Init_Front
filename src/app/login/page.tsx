@@ -1,9 +1,9 @@
 "use client"
 
-import { ChangeEvent, useState } from "react"
+import {ChangeEvent, useState} from "react"
 import SignupForm from "./back_join"
 import LoginForm from "./front_login"
-import { useSearchParams } from "next/navigation"
+import {useSearchParams} from "next/navigation"
 
 export default function LoginPage() {
     const searchParams = useSearchParams()
@@ -26,8 +26,8 @@ export default function LoginPage() {
     })
 
     function handleInputChange(e: ChangeEvent<HTMLInputElement>): void {
-        const { name, value } = e.target
-        setFormData((prev) => ({ ...prev, [name]: value }))
+        const {name, value} = e.target
+        setFormData((prev) => ({...prev, [name]: value}))
     }
 
     function handleInterestChange(val: string): void {
@@ -35,7 +35,7 @@ export default function LoginPage() {
             const interests = prev.interests.includes(val)
                 ? prev.interests.filter((i) => i !== val)
                 : [...prev.interests, val]
-            return { ...prev, interests }
+            return {...prev, interests}
         })
     }
 
@@ -52,9 +52,9 @@ export default function LoginPage() {
                     {/* 앞면: 로그인 */}
                     <div
                         className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]"
-                        style={{ backfaceVisibility: "hidden" }}
+                        style={{backfaceVisibility: "hidden"}}
                     >
-                        <LoginForm onFlip={() => setIsFlipped(true)} />
+                        <LoginForm onFlip={() => setIsFlipped(true)}/>
                     </div>
 
                     {/* 뒷면: 회원가입 */}

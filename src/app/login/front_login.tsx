@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -18,12 +18,125 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
     })
     const [isLoading, setIsLoading] = useState(false)
 
+    // 🆕 쿠키 읽기 헬퍼 함수
+    const getCookie = (name: string): string | null => {
+        try {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) {
+                return parts.pop()?.split(';').shift() || null;
+            }
+            return null;
+        } catch (error) {
+            return null;
+        }
+    }
+
     // 쿠키 설정 헬퍼 함수
     const setCookie = (name: string, value: string, days: number = 7) => {
         const expires = new Date()
         expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
         document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
     }
+
+    // front_login.tsx의 useEffect 부분을 이것으로 교체
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const googleLogin = urlParams.get('googleLogin');
+        const error = urlParams.get('error');
+
+        console.log('🔍 URL 파라미터 확인:', { googleLogin, error });
+
+        if (googleLogin === 'success') {
+            console.log('🎉 구글 로그인 성공 감지');
+
+            // 🔥 현재 모든 쿠키 확인
+            console.log('🍪 전체 쿠키:', document.cookie);
+
+            // 쿠키 읽기 시도
+            const authToken = getCookie('authToken');
+            const userId = getCookie('userId');
+            const userName = getCookie('userName');
+            const userRole = getCookie('userRole');
+
+            console.log('🔍 개별 쿠키 확인:', {
+                authToken: authToken ? '***' + authToken.slice(-10) : '❌ 없음',
+                userId: userId || '❌ 없음',
+                userName: userName || '❌ 없음',
+                userRole: userRole || '❌ 없음'
+            });
+
+            if (authToken && userId && userName && userRole) {
+                console.log('✅ 모든 필요한 쿠키 존재');
+
+                // localStorage에 저장
+                localStorage.setItem('authToken', authToken);
+                localStorage.setItem('accessToken', authToken);
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('userName', decodeURIComponent(userName));
+                localStorage.setItem('userRole', userRole);
+
+                console.log('✅ localStorage 저장 완료');
+
+                // 성공 메시지
+                const decodedName = decodeURIComponent(userName);
+                if (userRole === 'ADMIN') {
+                    alert(`관리자 ${decodedName}님, 구글 로그인 성공!`);
+                } else {
+                    alert(`${decodedName}님, 구글 로그인 성공!`);
+                }
+
+                // URL 파라미터 제거 후 리다이렉트
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+                // 역할에 따른 리다이렉트
+                setTimeout(() => {
+                    if (userRole === 'ADMIN') {
+                        router.push('/admin');
+                    } else {
+                        router.push('/dashboard');
+                    }
+                }, 1000);
+
+            } else {
+                console.error('❌ 필요한 쿠키가 없음');
+                console.log('🔍 브라우저 개발자도구 > Application > Cookies에서 쿠키 확인 필요');
+
+                // 🆕 더 자세한 디버깅 정보
+                if (!authToken) console.error('❌ authToken 쿠키 없음');
+                if (!userId) console.error('❌ userId 쿠키 없음');
+                if (!userName) console.error('❌ userName 쿠키 없음');
+                if (!userRole) console.error('❌ userRole 쿠키 없음');
+
+                alert('구글 로그인 처리 중 오류가 발생했습니다.\n개발자도구 콘솔을 확인해주세요.');
+
+                // URL 파라미터 제거
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } else if (error) {
+            console.error('❌ 구글 로그인 에러:', error);
+
+            let errorMessage = "구글 로그인에 실패했습니다.";
+
+            switch (error) {
+                case 'invalid_google_account':
+                    errorMessage = "구글 계정 정보가 부족합니다. 다른 구글 계정으로 시도해주세요.";
+                    break;
+                case 'google_login_failed':
+                    errorMessage = "구글 로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+                    break;
+                case 'oauth2_failed':
+                    errorMessage = "OAuth2 인증에 실패했습니다.";
+                    break;
+            }
+
+            alert(errorMessage);
+
+            // URL 파라미터 제거
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, [router]);
 
     // 🔥 수정된 handleLogin 함수 - role 기반 리다이렉트
     async function handleLogin() {
@@ -169,7 +282,7 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
                 />
                 <label
                     htmlFor="loginPw"
-                    className="absolute text-sm text-slate-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+                    className="absolute text-sm text-slate-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
                 >
                     Password
                 </label>
@@ -205,6 +318,15 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
                 {isLoading ? '로그인 중...' : '로그인'}
             </motion.button>
 
+            <div className="text-center mb-6">
+                <Link
+                    href="/find-account"
+                    className="text-sm text-gray-600 hover:text-[#356ae4] transition-colors"
+                >
+                    아이디 · 비밀번호 찾기
+                </Link>
+            </div>
+
             {/* 소셜 로그인 */}
             <div className="social-login-row flex justify-center gap-4 mb-6">
                 <SocialButton
@@ -221,11 +343,12 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
                     src="/google.png"
                     alt="Google"
                     onClick={() => {
-                        window.location.href = "http://localhost:8080/oauth2/authorization/google" // 예시 URL
+                        console.log('🔍 구글 로그인 버튼 클릭');
+                        // 🔥 올바른 OAuth2 엔드포인트로 이동
+                        window.location.href = "http://localhost:8080/oauth2/authorization/google"
                     }}
                 />
             </div>
-
 
             {/* 회원가입 이동 */}
             <div className="text-center text-sm">

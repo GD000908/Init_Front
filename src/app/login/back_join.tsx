@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
-import { Eye, EyeOff, Check, X, Loader2 } from "lucide-react"
-import { authApi } from "@/lib/auth-api"
+import React, {useState, useEffect} from "react"
+import {Eye, EyeOff, Check, X, Loader2} from "lucide-react"
+import {authApi} from "@/lib/auth-api"
 
 interface SignupFormProps {
     formData: {
@@ -38,10 +38,10 @@ const interests = [
     "특수직",
 ]
 
-function PasswordCheck({ ok, label }: { ok: boolean; label: string }) {
+function PasswordCheck({ok, label}: { ok: boolean; label: string }) {
     return (
         <div className="flex items-center gap-2">
-            {ok ? <Check className="h-3 w-3 text-green-500" /> : <X className="h-3 w-3 text-red-500" />}
+            {ok ? <Check className="h-3 w-3 text-green-500"/> : <X className="h-3 w-3 text-red-500"/>}
             <span className={ok ? "text-green-600" : "text-red-600"}>{label}</span>
         </div>
     )
@@ -62,15 +62,26 @@ export default function SignupForm({
     const [userIdCheck, setUserIdCheck] = useState<{
         status: 'none' | 'checking' | 'available' | 'duplicate' | 'error';
         message: string;
-    }>({ status: 'none', message: '' });
+    }>({status: 'none', message: ''});
 
     const [emailCheck, setEmailCheck] = useState<{
         status: 'none' | 'checking' | 'available' | 'duplicate' | 'error' | 'sent' | 'verified';
         message: string;
-    }>({ status: 'none', message: '' });
+    }>({status: 'none', message: ''});
 
     const [emailVerificationCode, setEmailVerificationCode] = useState('');
     const [isSignupLoading, setIsSignupLoading] = useState(false);
+
+    // 🆕 구글 회원가입 상태 관리
+    const [isGoogleSignup, setIsGoogleSignup] = useState(false);
+    const [googleInfo, setGoogleInfo] = useState<{
+        email: string;
+        name: string;
+        googleId: string;
+    } | null>(null);
+
+    // 🔥 초기화 완료 상태 추가 (무한 alert 방지)
+    const [isInitialized, setIsInitialized] = useState(false);
 
     // 비밀번호 유효성 검사
     const isPasswordValid =
@@ -80,6 +91,101 @@ export default function SignupForm({
         /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
 
     const isPasswordMatch = formData.password === formData.confirmPassword;
+
+    // 🆕 쿠키 읽기 헬퍼 함수
+    const getCookie = (name: string): string | null => {
+        try {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) {
+                return parts.pop()?.split(';').shift() || null;
+            }
+            return null;
+        } catch (error) {
+            return null;
+        }
+    };
+
+    // 🆕 쿠키 삭제 헬퍼 함수
+    const deleteCookie = (name: string) => {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    };
+
+    // 🔥 구글 회원가입 정보 자동 입력 useEffect (무한 alert 해결)
+    useEffect(() => {
+        // 🔥 한 번만 실행되도록 보장
+        if (isInitialized) return;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const googleSignupParam = urlParams.get('googleSignup');
+
+        if (googleSignupParam === 'true') {
+            console.log('🔍 구글 회원가입 모드 감지');
+            setIsGoogleSignup(true);
+
+            // 임시 구글 정보 쿠키에서 데이터 읽기
+            const tempEmail = getCookie('tempGoogleEmail');
+            const tempName = getCookie('tempGoogleName');
+            const tempGoogleId = getCookie('tempGoogleId');
+
+            if (tempEmail && tempName) {
+                const decodedEmail = decodeURIComponent(tempEmail);
+                const decodedName = decodeURIComponent(tempName);
+
+                console.log('✅ 구글 정보 감지:', {decodedEmail, decodedName, tempGoogleId});
+
+                // 구글 정보 상태 저장
+                setGoogleInfo({
+                    email: decodedEmail,
+                    name: decodedName,
+                    googleId: tempGoogleId || ''
+                });
+
+                // 🔥 FormData 업데이트를 비동기로 처리 (무한 루프 방지)
+                const updateFormData = async () => {
+                    // 이메일 설정
+                    onChange({
+                        target: {name: 'email', value: decodedEmail}
+                    } as React.ChangeEvent<HTMLInputElement>);
+
+                    // 약간의 지연 후 이름 설정
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    onChange({
+                        target: {name: 'name', value: decodedName}
+                    } as React.ChangeEvent<HTMLInputElement>);
+                };
+
+                updateFormData();
+
+                // 이메일은 구글에서 인증된 것으로 간주
+                setEmailCheck({
+                    status: 'verified',
+                    message: '구글 계정으로 인증된 이메일입니다.'
+                });
+
+                // 🔥 alert를 딜레이와 함께 한 번만 표시
+                setTimeout(() => {
+                    if (!isInitialized) { // 다시 한 번 확인
+                        alert(`구글 계정 ${decodedName}님의 정보가 자동으로 입력되었습니다.\n추가 정보를 입력하여 회원가입을 완료해주세요.`);
+                    }
+                }, 1000);
+
+            } else {
+                console.warn('⚠️ 구글 정보 쿠키를 찾을 수 없습니다.');
+                setTimeout(() => {
+                    if (!isInitialized) {
+                        alert('구글 로그인 정보를 가져올 수 없습니다. 다시 시도해주세요.');
+                    }
+                }, 800);
+                setIsGoogleSignup(false);
+            }
+        }
+
+        // 🔥 초기화 완료 표시 (한 번만 실행되도록)
+        setIsInitialized(true);
+
+    }, []); // 🔥 의존성 배열을 비움 (한 번만 실행)
 
     // 🆕 아이디 중복확인 함수
     const handleUserIdCheck = async () => {
@@ -91,7 +197,7 @@ export default function SignupForm({
             return;
         }
 
-        setUserIdCheck({ status: 'checking', message: '확인 중...' });
+        setUserIdCheck({status: 'checking', message: '확인 중...'});
 
         try {
             const isDuplicate = await authApi.checkUserIdDuplicate(formData.userId);
@@ -115,8 +221,13 @@ export default function SignupForm({
         }
     };
 
-    // 🆕 이메일 인증번호 발송 함수 (중복확인 포함)
+    // 🆕 이메일 인증번호 발송 함수 (구글 회원가입 시 비활성화)
     const handleEmailVerificationSend = async () => {
+        if (isGoogleSignup) {
+            alert('구글 계정으로 이미 인증된 이메일입니다.');
+            return;
+        }
+
         if (!formData.email || !formData.email.includes('@')) {
             setEmailCheck({
                 status: 'error',
@@ -125,7 +236,7 @@ export default function SignupForm({
             return;
         }
 
-        setEmailCheck({ status: 'checking', message: '이메일 확인 중...' });
+        setEmailCheck({status: 'checking', message: '이메일 확인 중...'});
 
         try {
             // 1단계: 중복확인
@@ -178,16 +289,51 @@ export default function SignupForm({
     // 🆕 아이디 입력 변경 시 중복확인 상태 초기화
     const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e);
-        setUserIdCheck({ status: 'none', message: '' });
+        setUserIdCheck({status: 'none', message: ''});
     };
 
-    // 🆕 이메일 입력 변경 시 중복확인 상태 초기화
+    // 🆕 이메일 입력 변경 시 처리 (구글 회원가입 시 변경 방지)
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (isGoogleSignup && googleInfo) {
+            alert('구글 계정으로 회원가입 중에는 이메일을 변경할 수 없습니다.');
+            return;
+        }
         onChange(e);
-        setEmailCheck({ status: 'none', message: '' });
+        setEmailCheck({status: 'none', message: ''});
+    };
+    // 🆕 휴대폰 번호 포맷팅 함수
+    const formatPhoneNumber = (value: string): string => {
+        // 숫자만 추출
+        const numbers = value.replace(/[^\d]/g, '');
+
+        // 11자리 초과 시 자름
+        const limitedNumbers = numbers.slice(0, 11);
+
+        // 형식에 맞게 하이픈 추가
+        if (limitedNumbers.length <= 3) {
+            return limitedNumbers;
+        } else if (limitedNumbers.length <= 7) {
+            return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3)}`;
+        } else {
+            return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3, 7)}-${limitedNumbers.slice(7)}`;
+        }
     };
 
-    // 🆕 회원가입 함수 (중복확인 완료 체크 추가)
+// 🆕 휴대폰 번호 유효성 검사 함수
+    const validatePhoneNumber = (phone: string): boolean => {
+        const numbers = phone.replace(/[^\d]/g, '');
+        // 010, 011, 016, 017, 018, 019로 시작하는 10-11자리 번호
+        const phoneRegex = /^(010|011|016|017|018|019)\d{7,8}$/;
+        return phoneRegex.test(numbers);
+    };
+
+// 🆕 휴대폰 번호 입력 핸들러
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        onChange({...e, target: {...e.target, name: 'phone', value: formatted}});
+    };
+
+    // 🆕 회원가입 함수 (구글 정보 포함)
     async function handleSignup() {
         // 중복확인 완료 체크
         if (userIdCheck.status !== 'available') {
@@ -200,10 +346,31 @@ export default function SignupForm({
             return;
         }
 
+        // 구글 회원가입인 경우 이메일 일치 확인
+        if (isGoogleSignup && googleInfo && formData.email !== googleInfo.email) {
+            alert('구글 계정의 이메일과 입력한 이메일이 일치하지 않습니다.');
+            return;
+        }
+
         setIsSignupLoading(true);
 
         try {
-            await authApi.signup(formData);
+            // 🆕 구글 정보를 포함한 회원가입 데이터 준비
+            const signupData = {
+                ...formData,
+                ...(isGoogleSignup && googleInfo && {googleId: googleInfo.googleId})
+            };
+
+            await authApi.signup(signupData);
+
+            // 성공 시 임시 쿠키 삭제
+            if (isGoogleSignup) {
+                deleteCookie('tempGoogleEmail');
+                deleteCookie('tempGoogleName');
+                deleteCookie('tempGoogleId');
+                console.log('🧹 임시 구글 쿠키 삭제 완료');
+            }
+
             alert("회원가입 성공!");
             onFlip();
         } catch (error) {
@@ -228,20 +395,33 @@ export default function SignupForm({
     return (
         <div
             className="w-[650px] h-full bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-2xl flex flex-col overflow-y-auto"
-            style={{ backfaceVisibility: "hidden" }}
+            style={{backfaceVisibility: "hidden"}}
         >
-            <h2 className="text-2xl font-bold text-center text-[#356ae4] mb-6">회원가입</h2>
+            {/* 🆕 구글 회원가입 표시 */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-center text-[#356ae4]">회원가입</h2>
+                {isGoogleSignup && (
+                    <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                        <span className="text-xs text-blue-700">🔗 구글 계정 연동</span>
+                    </div>
+                )}
+            </div>
 
             {/* 이름 */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-slate-700 mb-2">이름</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                    이름 {isGoogleSignup && <span className="text-blue-600 text-xs">(구글에서 자동 입력)</span>}
+                </label>
                 <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={onChange}
                     placeholder="이름을 입력하세요"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#356ae4]"
+                    className={`w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#356ae4] ${
+                        isGoogleSignup ? 'bg-blue-50/50' : ''
+                    }`}
+                    readOnly={isGoogleSignup}
                 />
             </div>
 
@@ -263,7 +443,7 @@ export default function SignupForm({
                         disabled={userIdCheck.status === 'checking' || !formData.userId}
                         className="bg-slate-200 hover:bg-slate-300 disabled:opacity-50 px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1"
                     >
-                        {userIdCheck.status === 'checking' && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {userIdCheck.status === 'checking' && <Loader2 className="w-3 h-3 animate-spin"/>}
                         중복확인
                     </button>
                 </div>
@@ -273,9 +453,9 @@ export default function SignupForm({
                         userIdCheck.status === 'available' ? 'text-green-600' :
                             userIdCheck.status === 'duplicate' ? 'text-red-600' : 'text-gray-600'
                     }`}>
-                        {userIdCheck.status === 'available' && <Check className="h-3 w-3" />}
-                        {userIdCheck.status === 'duplicate' && <X className="h-3 w-3" />}
-                        {userIdCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" />}
+                        {userIdCheck.status === 'available' && <Check className="h-3 w-3"/>}
+                        {userIdCheck.status === 'duplicate' && <X className="h-3 w-3"/>}
+                        {userIdCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin"/>}
                         <span>{userIdCheck.message}</span>
                     </div>
                 )}
@@ -298,12 +478,12 @@ export default function SignupForm({
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
                     </button>
                 </div>
                 {formData.password && (
                     <div className="mt-2 space-y-1 text-xs">
-                        <PasswordCheck ok={formData.password.length >= 8} label="8자 이상" />
+                        <PasswordCheck ok={formData.password.length >= 8} label="8자 이상"/>
                         <PasswordCheck
                             ok={
                                 /[a-zA-Z]/.test(formData.password) &&
@@ -333,19 +513,19 @@ export default function SignupForm({
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
                     </button>
                 </div>
                 {formData.confirmPassword && (
                     <div className="mt-1 text-xs flex items-center gap-2">
                         {isPasswordMatch ? (
                             <>
-                                <Check className="h-3 w-3 text-green-500" />
+                                <Check className="h-3 w-3 text-green-500"/>
                                 <span className="text-green-600">비밀번호가 일치합니다</span>
                             </>
                         ) : (
                             <>
-                                <X className="h-3 w-3 text-red-500" />
+                                <X className="h-3 w-3 text-red-500"/>
                                 <span className="text-red-600">비밀번호가 일치하지 않습니다</span>
                             </>
                         )}
@@ -354,21 +534,39 @@ export default function SignupForm({
             </div>
 
             {/* 휴대폰 번호 */}
+            {/* 휴대폰 번호 - 🆕 포맷팅 적용 */}
             <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-700 mb-2">휴대폰 번호</label>
                 <input
                     type="text"
                     name="phone"
                     value={formData.phone}
-                    onChange={onChange}
+                    onChange={handlePhoneChange}
                     placeholder="010-1234-5678"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#356ae4]"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm bg-white/50 focus:outline-none focus:ring-2 transition-colors ${
+                        formData.phone && !validatePhoneNumber(formData.phone)
+                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                            : 'border-slate-300 focus:ring-[#356ae4] focus:border-[#356ae4]'
+                    }`}
+                    maxLength={13} // 000-0000-0000 형식의 최대 길이
                 />
+                {/* 🆕 휴대폰 번호 유효성 검사 메시지 */}
+                {formData.phone && formData.phone.length > 0 && (
+                    <div className="mt-1 text-xs">
+                        {validatePhoneNumber(formData.phone) ? (
+                            <span className="text-green-600">✓ 올바른 형식입니다</span>
+                        ) : (
+                            <span className="text-red-600">올바른 휴대폰 번호를 입력해주세요 (010-1234-5678)</span>
+                        )}
+                    </div>
+                )}
             </div>
 
-            {/* 🆕 이메일 (인증번호 발송 시 자동 중복확인) */}
+            {/* 🆕 이메일 (구글 회원가입 시 특별 처리) */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-slate-700 mb-2">이메일</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                    이메일 {isGoogleSignup && <span className="text-blue-600 text-xs">(구글에서 자동 입력)</span>}
+                </label>
                 <div className="flex gap-2">
                     <input
                         type="email"
@@ -376,16 +574,19 @@ export default function SignupForm({
                         value={formData.email}
                         onChange={handleEmailChange}
                         placeholder="example@email.com"
-                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#356ae4]"
+                        className={`flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#356ae4] ${
+                            isGoogleSignup ? 'bg-blue-50/50' : ''
+                        }`}
+                        readOnly={isGoogleSignup}
                     />
                     <button
                         type="button"
                         onClick={handleEmailVerificationSend}
-                        disabled={emailCheck.status === 'checking' || !formData.email}
+                        disabled={emailCheck.status === 'checking' || !formData.email || isGoogleSignup}
                         className="bg-slate-200 hover:bg-slate-300 disabled:opacity-50 px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1"
                     >
-                        {emailCheck.status === 'checking' && <Loader2 className="w-3 h-3 animate-spin" />}
-                        인증번호
+                        {emailCheck.status === 'checking' && <Loader2 className="w-3 h-3 animate-spin"/>}
+                        {isGoogleSignup ? '인증완료' : '인증번호'}
                     </button>
                 </div>
                 {/* 🆕 중복확인 및 인증 결과 표시 */}
@@ -394,14 +595,15 @@ export default function SignupForm({
                         emailCheck.status === 'available' || emailCheck.status === 'sent' || emailCheck.status === 'verified' ? 'text-green-600' :
                             emailCheck.status === 'duplicate' ? 'text-red-600' : 'text-gray-600'
                     }`}>
-                        {(emailCheck.status === 'available' || emailCheck.status === 'sent' || emailCheck.status === 'verified') && <Check className="h-3 w-3" />}
-                        {emailCheck.status === 'duplicate' && <X className="h-3 w-3" />}
-                        {emailCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" />}
+                        {(emailCheck.status === 'available' || emailCheck.status === 'sent' || emailCheck.status === 'verified') &&
+                            <Check className="h-3 w-3"/>}
+                        {emailCheck.status === 'duplicate' && <X className="h-3 w-3"/>}
+                        {emailCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin"/>}
                         <span>{emailCheck.message}</span>
                     </div>
                 )}
-                {/* 🆕 인증번호 입력 필드 (인증번호 발송 후 표시) */}
-                {emailCheck.status === 'sent' && (
+                {/* 🆕 인증번호 입력 필드 (일반 회원가입 시에만 표시) */}
+                {emailCheck.status === 'sent' && !isGoogleSignup && (
                     <div className="mt-2">
                         <div className="flex gap-2">
                             <input
@@ -454,14 +656,14 @@ export default function SignupForm({
                 <p className="text-xs text-slate-500 mt-2">선택한 관심 분야: {formData.interests.length}개</p>
             </div>
 
-            {/* 🆕 회원가입 버튼 (중복확인 완료 체크 추가) */}
+            {/* 🆕 회원가입 버튼 */}
             <button
                 onClick={handleSignup}
                 disabled={isSignupDisabled}
                 className="bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
             >
-                {isSignupLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                {isSignupLoading ? '회원가입 중...' : '회원가입'}
+                {isSignupLoading && <Loader2 className="w-4 h-4 animate-spin"/>}
+                {isSignupLoading ? '회원가입 중...' : (isGoogleSignup ? '구글 계정 연동하여 회원가입' : '회원가입')}
             </button>
 
             <div className="text-center mt-4 text-sm">
