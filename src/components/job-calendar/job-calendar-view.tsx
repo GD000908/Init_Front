@@ -625,7 +625,7 @@ export default function JobCalendarView() {
                         className="text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl px-4 py-2 text-sm"
                     >
                         <Bookmark className="w-4 h-4 mr-2" />
-                        북마크 목록
+                        공고 목록
                     </Button>
 
                     {/* 공고 추가 버튼 */}
@@ -772,7 +772,7 @@ export default function JobCalendarView() {
                     <DialogHeader>
                         <DialogTitle className="flex items-center text-xl font-semibold text-gray-800 dark:text-gray-100">
                             <Bookmark className="w-5 h-5 mr-2 text-indigo-500" />
-                            북마크한 공고 목록
+                            저장한 공고 목록
                         </DialogTitle>
                     </DialogHeader>
 

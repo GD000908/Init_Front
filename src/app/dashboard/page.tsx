@@ -891,7 +891,7 @@ const StatsSection = React.memo(({ applications, stats, onEdit }: { applications
                 <div className="grid grid-cols-4 gap-2 relative z-10">
                     <AnimatedCounter end={stats?.resumeCount ?? 0} label="작성한 이력서" />
                     <AnimatedCounter end={stats?.coverLetterCount ?? 0} label="완성한 자소서" delay={0.2} />
-                    <AnimatedCounter end={stats?.bookmarkedCompanies ?? 0} label="북마크한 기업" delay={0.4} />
+                    <AnimatedCounter end={stats?.bookmarkedCompanies ?? 0} label="저장된 기업 공고" delay={0.4} />
                     <AnimatedCounter end={stats?.deadlinesApproaching ?? 0} label="지원 마감 임박" delay={0.6} />
                 </div>
             </Card>

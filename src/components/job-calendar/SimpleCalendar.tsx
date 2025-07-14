@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { CalendarIcon, ChevronLeft, ChevronRight, Home } from "lucide-react"
+// [추가] Popover 컴포넌트를 import 합니다.
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
     format,
     addMonths,
@@ -226,8 +228,9 @@ export default function SimpleCalendar({
                                     )}
                                 </div>
 
-                                {/* 이벤트 표시 */}
+                                {/* [수정] 이벤트 표시 로직 변경 */}
                                 <div className="space-y-0.5">
+                                    {/* 최대 2개의 이벤트만 표시 */}
                                     {events.slice(0, 2).map((event) => {
                                         const isDeadline = isSameDay(day, event.end)
                                         const isStart = isSameDay(day, event.start)
@@ -242,13 +245,13 @@ export default function SimpleCalendar({
                                                         : "opacity-90 hover:opacity-100"
                                                 } ${
                                                     isDeadline
-                                                        ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-l border-red-500 font-medium"
+                                                        ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-l-2 border-red-500 font-medium"
                                                         : isStart
-                                                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-l border-green-500"
-                                                            : "border-l"
+                                                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-l-2 border-green-500"
+                                                            : "border-l-2"
                                                 }`}
                                                 style={{
-                                                    backgroundColor: isDeadline || isStart ? undefined : `${event.color}15`,
+                                                    backgroundColor: isDeadline || isStart ? undefined : `${event.color}1A`, // 투명도 조절
                                                     color: isDeadline || isStart ? undefined : event.color,
                                                     borderLeftColor: event.color,
                                                 }}
@@ -256,30 +259,54 @@ export default function SimpleCalendar({
                                                 title={`${event.title} - ${event.position || ''}`}
                                             >
                                                 <div className="flex items-center justify-between">
-                          <span className="truncate flex-1">
-                            {isDeadline && "📍 "}
-                              {isStart && "🎯 "}
-                              {event.title}
-                          </span>
+                                                    <span className="truncate flex-1">
+                                                        {isDeadline && "📍 "}
+                                                        {isStart && "🎯 "}
+                                                        {event.title}
+                                                    </span>
                                                     {daysUntilDeadline <= 3 && daysUntilDeadline >= 0 && !isDeadline && (
                                                         <span className="ml-1 text-orange-600 dark:text-orange-400 font-bold">
-                              {daysUntilDeadline}
-                            </span>
+                                                            {daysUntilDeadline}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
                                         )
                                     })}
 
+                                    {/* [추가] 2개 초과 이벤트는 Popover로 표시 */}
                                     {events.length > 2 && (
-                                        <div className="text-xs text-indigo-500 dark:text-indigo-400 font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-sm">
-                                            +{events.length - 2}
-                                        </div>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <button className="w-full text-xs text-indigo-600 dark:text-indigo-400 font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-sm text-left hover:bg-indigo-100 dark:hover:bg-indigo-900/30">
+                                                    + {events.length - 2} more...
+                                                </button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-60 p-2 space-y-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg shadow-xl">
+                                                <h4 className="text-sm font-semibold px-2 py-1 text-gray-800 dark:text-gray-200">
+                                                    {format(day, "M월 d일")} 공고
+                                                </h4>
+                                                {events.map((event) => (
+                                                    <button
+                                                        key={`popover-${event.id}`}
+                                                        onClick={() => onEventClick && onEventClick(event)}
+                                                        className="w-full text-left text-xs p-1.5 rounded-md flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                    >
+                                                        <span
+                                                            className="w-2 h-2 rounded-full mr-2 flex-shrink-0"
+                                                            style={{ backgroundColor: event.color }}
+                                                        ></span>
+                                                        <span className="truncate text-gray-700 dark:text-gray-300">{event.title}</span>
+                                                    </button>
+                                                ))}
+                                            </PopoverContent>
+                                        </Popover>
                                     )}
                                 </div>
                             </div>
                         )
-                    })}        </div>
+                    })}
+                </div>
             </div>
 
             {/* 범례 */}
