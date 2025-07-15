@@ -10,11 +10,12 @@ import {
     AlertCircle, Star, Edit2, Loader2,
     PieChart as PieChartIcon, TrendingUp, Briefcase, ArrowRight,
     Award, Camera, Link, Languages, GraduationCap, Trash2,
-    Building, ExternalLink, RefreshCw, Shield
+    Building, ExternalLink, RefreshCw, Shield , Calendar
 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import EnhancedJobRecommendations from '@/components/EnhancedJobRecommendations'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 // API 기본 URL
 const API_BASE_URL = 'http://localhost:8080/api/home';
@@ -1330,6 +1331,8 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
     )
 }
 
+// page.tsx의 ApplicationStatusModal 컴포넌트 개선
+
 const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId }: {
     isOpen: boolean,
     onClose: () => void,
@@ -1343,20 +1346,20 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
     useEffect(() => {
         setApps(applications.map(app => ({
             ...app,
-            userId: userId, // 🔥 userId 확실히 설정
+            userId: userId,
             deadline: app.deadline ? app.deadline.split('T')[0] : ''
         })));
-    }, [isOpen, applications, userId]) // 🔥 userId 의존성 추가
+    }, [isOpen, applications, userId])
 
     const handleAdd = () => {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const newApp: ApplicationData = {
             id: -Date.now(),
-            company: "새로운 회사",
-            category: "직무 선택",
+            company: "",
+            category: "",
             status: '지원 완료',
-            userId: userId, // 🔥 userId 확실히 설정
+            userId: userId,
             deadline: tomorrow.toISOString().split('T')[0]
         };
         setApps([newApp, ...apps]);
@@ -1370,20 +1373,16 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
         setApps(apps.map(app => app.id === id ? {
             ...app,
             [field]: value,
-            userId: userId // 🔥 업데이트 시에도 userId 유지
+            userId: userId
         } : app));
     }
-
-    // ApplicationStatusModal 컴포넌트 내부의 handleSave 함수 수정
 
     const handleSave = async () => {
         try {
             setIsLoading(true);
-
-            // 🔥 모든 앱에 userId가 설정되어 있는지 확인
             const appsWithUserId = apps.map(app => ({
                 ...app,
-                userId: userId // 🔥 저장 직전에도 userId 확실히 설정
+                userId: userId
             }));
 
             console.log('📤 ApplicationStatusModal에서 저장 시도:', {
@@ -1392,7 +1391,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                 apps: appsWithUserId
             });
 
-            // 🔥 userId를 명시적으로 전달하는 새로운 API 호출
             const response = await fetch(`${API_BASE_URL}/applications/batch/${userId}`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
@@ -1412,7 +1410,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
             onSave(updated);
             onClose();
 
-            // 🔥 성공 메시지 표시
             if (appsWithUserId.length === 0) {
                 alert('모든 지원현황이 삭제되었습니다.');
             } else {
@@ -1427,80 +1424,198 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
         }
     }
 
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title="지원 현황 관리">
-            <div className="space-y-4">
-                <Button onClick={handleAdd} className="w-full shadow-sm" disabled={isLoading}>
-                    <Plus className="w-4 h-4 mr-2" />새 지원내역 추가
-                </Button>
+    if (!isOpen) return null;
 
-                {/* 🔥 0개일 때도 안전하게 처리 */}
-                {apps.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                        <p>등록된 지원내역이 없습니다.</p>
-                        <p className="text-sm mt-1">위의 버튼을 클릭해서 지원내역을 추가해보세요.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2 -mr-2">
-                        {apps.map(app => (
-                            <div key={app.id} className="grid grid-cols-12 gap-2 items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                <div className="col-span-3">
-                                    <Input
-                                        placeholder="회사명"
-                                        value={app.company}
-                                        onChange={e => handleUpdate(app.id, 'company', e.target.value)}
-                                    />
-                                </div>
-                                <div className="col-span-3">
-                                    <Input
-                                        placeholder="직무"
-                                        value={app.category}
-                                        onChange={e => handleUpdate(app.id, 'category', e.target.value)}
-                                    />
-                                </div>
-                                <div className="col-span-3">
-                                    <Input
-                                        type="date"
-                                        value={app.deadline}
-                                        onChange={e => handleUpdate(app.id, 'deadline', e.target.value)}
-                                    />
-                                </div>
-                                <div className="col-span-2">
-                                    <Select
-                                        value={app.status}
-                                        onChange={e => handleUpdate(app.id, 'status', e.target.value)}
-                                        className="h-10 text-sm"
-                                    >
-                                        <option value="지원 완료">지원 완료</option>
-                                        <option value="서류 합격">서류 합격</option>
-                                        <option value="최종 합격">최종 합격</option>
-                                        <option value="불합격">불합격</option>
-                                    </Select>
-                                </div>
-                                <div className="col-span-1 text-right">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="w-8 h-8 rounded-full"
-                                        onClick={() => handleRemove(app.id)}
-                                        disabled={isLoading}
-                                    >
-                                        <Trash2 className="w-4 h-4 text-red-500"/>
-                                    </Button>
-                                </div>
+    const handleContentClick = (e: React.MouseEvent) => e.stopPropagation();
+
+    return (
+        <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            onClick={onClose}
+            style={{
+                // 🔥 사이드바 영역을 제외한 오버레이
+                left: '280px', // 사이드바 너비만큼 왼쪽 여백
+            }}
+        >
+            <div className="flex items-center justify-center min-h-screen p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl"
+                    style={{
+                        // 🔥 적절한 크기로 조정
+                        width: '90%', // 메인 영역의 90%
+                        maxWidth: '900px', // 최대 너비 제한
+                        minWidth: '600px', // 최소 너비 보장
+                        maxHeight: '85vh' // 높이 제한
+                    }}
+                    onClick={handleContentClick}
+                >
+                    {/* 헤더 */}
+                    <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                                <Briefcase className="w-5 h-5 text-white" />
                             </div>
-                        ))}
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">지원 현황 관리</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    지원한 회사들의 현황을 관리하세요
+                                </p>
+                            </div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8">
+                            <X className="w-5 h-5" />
+                        </Button>
                     </div>
-                )}
+
+                    {/* 컨텐츠 */}
+                    <div className="p-6">
+                        {/* 추가 버튼 */}
+                        <div className="mb-6">
+                            <Button
+                                onClick={handleAdd}
+                                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl px-6 py-3 shadow-lg"
+                                disabled={isLoading}
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                새 지원내역 추가
+                            </Button>
+                        </div>
+
+                        {/* 지원내역 목록 */}
+                        {apps.length === 0 ? (
+                            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                                <Briefcase className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                                <p className="text-lg mb-2">등록된 지원내역이 없습니다.</p>
+                                <p className="text-sm">위의 버튼을 클릭해서 지원내역을 추가해보세요.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                {apps.map(app => (
+                                    <motion.div
+                                        key={app.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600"
+                                    >
+                                        <div className="grid grid-cols-12 gap-3 items-end">
+                                            {/* 회사명 */}
+                                            <div className="col-span-3">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    회사명
+                                                </label>
+                                                <Input
+                                                    placeholder="예: 네이버"
+                                                    value={app.company}
+                                                    onChange={e => handleUpdate(app.id, 'company', e.target.value)}
+                                                    className="rounded-lg border-gray-300 dark:border-gray-600"
+                                                />
+                                            </div>
+
+                                            {/* 직무 */}
+                                            <div className="col-span-3">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    직무
+                                                </label>
+                                                <Input
+                                                    placeholder="예: 프론트엔드"
+                                                    value={app.category}
+                                                    onChange={e => handleUpdate(app.id, 'category', e.target.value)}
+                                                    className="rounded-lg border-gray-300 dark:border-gray-600"
+                                                />
+                                            </div>
+
+                                            {/* 마감일 */}
+                                            <div className="col-span-2">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    날짜
+                                                </label>
+                                                <div className="relative">
+                                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                                    <Input
+                                                        type="date"
+                                                        value={app.deadline}
+                                                        onChange={e => handleUpdate(app.id, 'deadline', e.target.value)}
+                                                        className="pl-10 rounded-lg border-gray-300 dark:border-gray-600"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* 상태 */}
+                                            <div className="col-span-3">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    상태
+                                                </label>
+                                                <Select
+                                                    value={app.status}
+                                                    onChange={e => handleUpdate(app.id, 'status', e.target.value)}
+                                                    className="rounded-lg border-gray-300 dark:border-gray-600 text-sm"
+                                                >
+                                                    <option value="지원 완료">지원 완료</option>
+                                                    <option value="서류 합격">서류 합격</option>
+                                                    <option value="최종 합격">최종 합격</option>
+                                                    <option value="불합격">불합격</option>
+                                                </Select>
+                                            </div>
+
+                                            {/* 삭제 버튼 */}
+                                            <div className="col-span-1 flex justify-center">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="w-9 h-9 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                    onClick={() => handleRemove(app.id)}
+                                                    disabled={isLoading}
+                                                >
+                                                    <Trash2 className="w-4 h-4"/>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 푸터 */}
+                    <div className="flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                            총 {apps.length}개의 지원내역
+                        </div>
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="rounded-xl px-6"
+                            >
+                                취소
+                            </Button>
+                            <Button
+                                onClick={handleSave}
+                                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl px-6 shadow-lg"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        저장 중...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        저장하기
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
-            <div className="flex gap-3 mt-8 justify-end">
-                <Button variant="outline" onClick={onClose} disabled={isLoading}>취소</Button>
-                <Button onClick={handleSave} className="shadow-md" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    저장
-                </Button>
-            </div>
-        </Modal>
+        </div>
     )
 }
 
