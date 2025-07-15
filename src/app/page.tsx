@@ -58,9 +58,9 @@ export default function Home() {
         >
             {/* 배경 장식 요소들 */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#356ae4]/5 via-purple-500/5 to-pink-500/5" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#6366f1]/5 via-purple-500/5 to-pink-500/5" />
                 <motion.div
-                    className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-[#356ae4]/20 to-purple-500/20 rounded-full blur-3xl"
+                    className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-[#6366f1]/20 to-purple-500/20 rounded-full blur-3xl"
                     animate={{ x: [0, 100, 0], y: [0, -50, 0], scale: [1, 1.2, 1] }}
                     transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
                 />
@@ -70,7 +70,7 @@ export default function Home() {
                     transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <motion.div
-                    className="absolute top-1/2 left-1/2 w-96 h-96 bg-gradient-to-br from-[#356ae4]/10 to-indigo-500/10 rounded-full blur-3xl"
+                    className="absolute top-1/2 left-1/2 w-96 h-96 bg-gradient-to-br from-[#6366f1]/10 to-indigo-500/10 rounded-full blur-3xl"
                     animate={{ x: [0, 150, -150, 0], y: [0, -100, 100, 0], scale: [1, 1.1, 0.9, 1] }}
                     transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
                 />
@@ -93,13 +93,13 @@ export default function Home() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                     >
-                        <a href="#features" className="text-slate-600 hover:text-[#356ae4] transition-colors">기능</a>
-                        <a href="#vision" className="text-slate-600 hover:text-[#356ae4] transition-colors">비전</a>
-                        <a href="#about" className="text-slate-600 hover:text-[#356ae4] transition-colors">소개</a>
+                        <a href="#about" className="text-slate-600 hover:text-[#6366f1] transition-colors">소개</a>
+                        <a href="#features" className="text-slate-600 hover:text-[#6366f1] transition-colors">기능</a>
+                        <a href="#vision" className="text-slate-600 hover:text-[#6366f1] transition-colors">비전</a>
                     </motion.nav>
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
                         <Link href="/login">
-                            <button className="inline-flex items-center px-4 py-2 text-slate-600 hover:text-[#356ae4] hover:bg-blue-50 transition-all rounded-md">
+                            <button className="inline-flex items-center px-4 py-2 text-slate-600 hover:text-[#6366f1] hover:bg-blue-50 transition-all rounded-md">
                                 <User className="h-5 w-5 mr-2" />
                                 로그인
                             </button>
@@ -125,9 +125,9 @@ export default function Home() {
                             animate={{ y: [0, -30, 0], rotate: [0, 180, 360], scale: [1, 1.2, 1] }}
                             transition={{ duration: 15 + i * 2, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
                         >
-                            {i % 3 === 0 && <div className="w-4 h-4 bg-gradient-to-br from-[#356ae4]/30 to-purple-500/30 rounded-full" />}
+                            {i % 3 === 0 && <div className="w-4 h-4 bg-gradient-to-br from-[#6366f1]/30 to-purple-500/30 rounded-full" />}
                             {i % 3 === 1 && <div className="w-6 h-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rotate-45" />}
-                            {i % 3 === 2 && <div className="w-3 h-8 bg-gradient-to-b from-[#356ae4]/25 to-indigo-500/25 rounded-full" />}
+                            {i % 3 === 2 && <div className="w-3 h-8 bg-gradient-to-b from-[#6366f1]/25 to-indigo-500/25 rounded-full" />}
                         </motion.div>
                     ))}
                 </div>
@@ -138,10 +138,10 @@ export default function Home() {
                             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
                                 <h1 className="text-4xl md:text-6xl font-bold text-slate-800 mb-6 leading-tight">
                                     이력서 관리의 <br />
-                                    <span className="text-[#356ae4] relative">
+                                    <span className="text-[#6366f1] relative">
                                         새로운 시작
                                         <motion.span
-                                            className="absolute bottom-0 left-0 w-full h-1 bg-[#356ae4]"
+                                            className="absolute bottom-0 left-0 w-full h-1 bg-[#6366f1]"
                                             initial={{ width: 0 }}
                                             animate={{ width: "100%" }}
                                             transition={{ duration: 1, delay: 1 }}
@@ -163,7 +163,7 @@ export default function Home() {
                                 transition={{ duration: 0.8, delay: 0.6 }}
                             >
                                 <button
-                                    className="bg-[#356ae4] hover:bg-[#2857c8] text-white px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+                                    className="bg-[#6366f1] hover:bg-[#8b5cf6] text-white px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
                                     onClick={handleGetStarted}
                                 >
                                     시작하기
@@ -226,9 +226,61 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 기능 소개 섹션 - 4가지 기능 */}
+            {/* 소개 섹션 - 첫 번째로 이동 */}
+            <section id="about" className="py-20 bg-white/60 backdrop-blur-sm relative">
+                <div className="absolute inset-0 bg-gradient-to-l from-[#6366f1]/5 to-indigo-500/5" />
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <motion.div
+                            className="space-y-6"
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8 }}
+                            viewport={{ once: true }}
+                        >
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-800">Init은 취업 준비 과정에서 누구나 한 번쯤 겪는 불편함에서 출발했습니다.</h2>
+                            <p className="text-lg text-slate-600">
+                                사람인, 잡플래닛, 원티드, 링크드인 등 수많은 취업 플랫폼이 있지만, 기업마다 공고를 올리는 사이트가 다르기 때문에 취준생은 여러 플랫폼에 가입하고, 같은 내용을 반복해서 작성해야 했습니다.
+                                “내 스펙을 어디에 적었더라?”
+                                “자소서는 어느 사이트에 저장했지?”
+                                이처럼 흩어진 정보와 반복적인 작업 속에서, 비효율적인 취업 준비가 이어졌습니다.
+                            </p>
+                            <p className="text-lg text-slate-600">
+                                Init은 이러한 문제를 해결하기 위해 만들어졌습니다.
+                                이력서, 자소서, 스펙을 한 곳에 정리하고, 필요할 때마다 꺼내 보고, 복사하거나 공유할 수 있도록 돕는 플랫폼입니다.
+                                Init이 여러분의 스펙 정리를 단순하게, 취업 준비를 효율적으로 만들어 드립니다.
+                            </p>
+                        </motion.div>
+
+                        <motion.div
+                            className="relative h-[400px] rounded-xl overflow-hidden shadow-xl"
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8 }}
+                            viewport={{ once: false }}
+                        >
+                            <div className="w-full h-full bg-gradient-to-br flex items-center justify-center">
+                                <div className="text-center">
+                                    <img src={"/intro.png"} alt={"introduce image"}/>
+                                </div>
+                            </div>
+
+                            <motion.div
+                                className="absolute bottom-6 left-6 right-6 text-white"
+                                initial={{ y: 20, opacity: 0 }}
+                                whileInView={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.8, delay: 0.8 }}
+                                viewport={{ once: false }}
+                            >
+                            </motion.div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 기능 소개 섹션 - 두 번째로 이동 */}
             <section id="features" className="py-20 bg-white/70 backdrop-blur-sm relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#356ae4]/5 to-purple-500/5" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#6366f1]/5 to-purple-500/5" />
                 <div className="container mx-auto px-4 relative z-10">
                     <motion.div
                         className="text-center mb-16"
@@ -251,20 +303,26 @@ export default function Home() {
                             transition={{ duration: 0.8 }}
                             viewport={{ once: true }}
                         >
-                            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                                <div className="text-center text-blue-800">
-                                    {activeFeature === "resume" && <FileText className="h-20 w-20 mx-auto mb-4" />}
-                                    {activeFeature === "template" && <Briefcase className="h-20 w-20 mx-auto mb-4" />}
-                                    {activeFeature === "dashboard" && <Award className="h-20 w-20 mx-auto mb-4" />}
-                                    {activeFeature === "community" && <User className="h-20 w-20 mx-auto mb-4" />}
-                                    {!activeFeature && <FileText className="h-20 w-20 mx-auto mb-4" />}
-                                    <p className="text-lg font-medium">
-                                        {activeFeature === "resume" && "맞춤형 이력서"}
-                                        {activeFeature === "template" && "자소서 템플릿"}
-                                        {activeFeature === "dashboard" && "스펙 대시보드"}
-                                        {activeFeature === "community" && "커뮤니티"}
-                                        {!activeFeature && "Init 기능"}
-                                    </p>
+                            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center p-4">
+                                <div className="text-center w-full h-full flex flex-col items-center justify-center">
+                                    {activeFeature === "resume" && (
+                                        <img src="/job.png" alt="맞춤 공고" className="max-w-full max-h-full object-contain rounded-lg shadow-lg" />
+                                    )}
+                                    {activeFeature === "template" && (
+                                        <img src="/resume.png" alt="이력서 템플릿" className="max-w-full max-h-full object-contain rounded-lg shadow-lg" />
+                                    )}
+                                    {activeFeature === "dashboard" && (
+                                        <img src="/dash.png" alt="스펙 대시보드" className="max-w-full max-h-full object-contain rounded-lg shadow-lg" />
+                                    )}
+                                    {activeFeature === "community" && (
+                                        <img src="/community.png" alt="커뮤니티" className="max-w-full max-h-full object-contain rounded-lg shadow-lg" />
+                                    )}
+                                    {!activeFeature && (
+                                        <div className="text-blue-800">
+                                            <FileText className="h-20 w-20 mx-auto mb-4" />
+                                            <p className="text-lg font-medium">Init 기능</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
@@ -282,7 +340,7 @@ export default function Home() {
                                 onMouseLeave={() => setActiveFeature(null)}
                             >
                                 <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <FileText className="h-6 w-6 text-[#356ae4]" />
+                                    <FileText className="h-6 w-6 text-[#6366f1]" />
                                 </div>
                                 <div>
                                     <h4 className="text-xl font-semibold text-slate-800 mb-2">맞춤형 이력서</h4>
@@ -338,7 +396,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* 비전 섹션 */}
+            {/* 비전 섹션 - 세 번째로 이동 */}
             <section id="vision" className="scroll-mt-32 py-20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 to-purple-50/80" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(53,106,228,0.1),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(147,51,234,0.1),transparent_50%)]" />
@@ -366,7 +424,7 @@ export default function Home() {
                         </motion.p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8 mb-16">
                         {[
                             { title: "효율성", desc: "반복적인 작업을 줄이고 지원 과정을 간소화하여 시간을 절약합니다." },
                             { title: "맞춤화", desc: "각 회사와 직무에 맞는 최적의 이력서와 자소서를 준비할 수 있습니다." },
@@ -386,68 +444,28 @@ export default function Home() {
                             </motion.div>
                         ))}
                     </div>
-                </div>
-            </section>
 
-            {/* 소개 섹션 */}
-            <section id="about" className="py-20 bg-white/60 backdrop-blur-sm relative">
-                <div className="absolute inset-0 bg-gradient-to-l from-[#356ae4]/5 to-indigo-500/5" />
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        <motion.div
-                            className="space-y-6"
-                            initial={{ opacity: 0, x: -50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8 }}
-                            viewport={{ once: true }}
+                    {/* 비전 섹션 마지막에 시작하기 버튼 추가 */}
+                    <motion.div
+                        className="text-center"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.5 }}
+                        viewport={{ once: true }}
+                    >
+                        <h3 className="text-2xl font-bold text-slate-800 mb-6">지금 바로 시작해보세요!</h3>
+                        <p className="text-lg text-slate-600 mb-8">
+                            Init과 함께 더 효율적인 취업 준비를 시작하세요. 몇 분만에 가입하고 바로 이용할 수 있습니다.
+                        </p>
+                        <motion.button
+                            className="bg-[#6366f1] hover:bg-[#8b5cf6] text-white px-10 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+                            onClick={handleGetStarted}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                         >
-                            <h2 className="text-3xl md:text-4xl font-bold text-slate-800">Init 소개</h2>
-                            <p className="text-lg text-slate-600">
-                                Init은 취업 준비생들의 고민을 해결하기 위해 만들어진 서비스입니다. 매번 새로운 회사에 지원할 때마다
-                                이력서와 자소서를 처음부터 작성하는 번거로움을 없애고, 효율적인 취업 준비를 도와드립니다.
-                            </p>
-                            <p className="text-lg text-slate-600">
-                                우리 팀은 취업 준비 과정에서 겪는 어려움을 직접 경험하고, 이해하여 불편했던 부분들을 해결하기 위해
-                                노력하고 있습니다. Init은 단순한 이력서 관리 도구가 아니라, 취업 준비생들이 자신의 역량을 최대한
-                                발휘할 수 있도록 돕는 파트너입니다. 우리는 지속적으로 사용자 피드백을 반영하여 서비스 개선에 힘쓰며,
-                                최신 트렌드와 기술을 반영하여 최적의 솔루션을 제공하기 위한 개발에 노력하고 있습니다.
-                            </p>
-                        </motion.div>
-
-                        <motion.div
-                            className="relative h-[400px] rounded-xl overflow-hidden shadow-xl"
-                            initial={{ opacity: 0, x: 50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-200 flex items-center justify-center">
-                                <div className="text-center text-indigo-800">
-                                    <User className="h-24 w-24 mx-auto mb-4" />
-                                    <p className="text-xl font-medium">팀 소개</p>
-                                </div>
-                            </div>
-
-                            <motion.div
-                                className="absolute inset-0 bg-gradient-to-t from-[#356ae4]/80 to-transparent"
-                                initial={{ opacity: 0 }}
-                                whileInView={{ opacity: 1 }}
-                                transition={{ duration: 1, delay: 0.5 }}
-                                viewport={{ once: true }}
-                            />
-
-                            <motion.div
-                                className="absolute bottom-6 left-6 right-6 text-white"
-                                initial={{ y: 20, opacity: 0 }}
-                                whileInView={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.8, delay: 0.8 }}
-                                viewport={{ once: true }}
-                            >
-                                <h3 className="text-2xl font-bold mb-2">함께 성장하는 팀</h3>
-                                <p>취업 준비생들의 성공을 위해 끊임없이 혁신하고 있습니다.</p>
-                            </motion.div>
-                        </motion.div>
-                    </div>
+                            무료로 시작하기
+                        </motion.button>
+                    </motion.div>
                 </div>
             </section>
 

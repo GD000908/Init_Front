@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import EnhancedJobRecommendations from '@/components/EnhancedJobRecommendations'
+
 // API 기본 URL
 const API_BASE_URL = 'http://localhost:8080/api/home';
 
@@ -1106,38 +1107,28 @@ Header.displayName = "Header";
 // 'children' prop을 받아 그대로 표시하도록 수정했습니다.
 const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) => {
     if (!isOpen) return null;
-
-    // 모달 내용 클릭 시 닫히는 것을 방지하는 함수
-    const handleContentClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-    };
+    const handleContentClick = (e: React.MouseEvent) => e.stopPropagation();
 
     return (
-        <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]"
-            onClick={onClose} // 배경 클릭 시 모달 닫기
-        >
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]" onClick={onClose}>
             <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg m-4"
-                onClick={handleContentClick} // 컨텐츠 영역 클릭 이벤트 전파 방지
+                onClick={handleContentClick}
             >
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{title}</h3>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8">
-                        <X className="w-5 h-5" />
-                    </Button>
+                    <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8"><X className="w-5 h-5" /></Button>
                 </div>
-                <div className="p-6">
-                    {children}
-                </div>
+                <div className="p-6">{children}</div>
             </motion.div>
         </div>
     );
 };
+
 
 
 const ProfileEditModal = ({ isOpen, onClose, profileData, onSave }: { isOpen: boolean, onClose: () => void, profileData: ProfileData, onSave: (data: ProfileData) => void }) => {
@@ -1197,9 +1188,19 @@ const ProfileEditModal = ({ isOpen, onClose, profileData, onSave }: { isOpen: bo
     )
 }
 
-const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }: { isOpen: boolean, onClose: () => void, conditionsData: ConditionsData, onSave: (data:ConditionsData) => void }) => {
+const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }: { isOpen: boolean, onClose: () => void, conditionsData: ConditionsData, onSave: (data: ConditionsData) => void }) => {
     const [data, setData] = useState(conditionsData);
     const [isLoading, setIsLoading] = useState(false);
+
+    // ✅ 자동완성용 직무 키워드 목록
+    const ALL_JOB_KEYWORDS = React.useMemo(() => [
+        "사업관리", "경영", "회계", "사무", "금융", "보험", "교육", "자연과학", "사회과학",
+        "법률", "경찰", "소방", "교도", "국방", "보건", "의료", "사회복지", "종교",
+        "문화", "예술", "디자인", "방송", "운전", "운송", "영업", "판매", "경비", "청소",
+        "이용", "숙박", "여행", "오락", "스포츠", "음식", "건설", "기계", "재료", "화학",
+        "섬유", "의복", "전기", "전자", "정보통신", "IT", "개발", "프로그래머", "소프트웨어",
+        "식품", "가공", "인쇄", "목재", "가구", "공예", "환경", "에너지", "안전", "농림어업"
+    ], []);
 
     useEffect(() => { setData(conditionsData) }, [conditionsData, isOpen]);
 
@@ -1219,45 +1220,90 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
         }
     };
 
-    const TagInput = ({ label, field, placeholder }: { label: string, field: keyof ConditionsData, placeholder: string }) => {
+    // ✅ 자동완성 기능이 추가된 태그 입력 컴포넌트
+    const TagInput = ({ label, field, placeholder, suggestionsList }: { label: string, field: keyof ConditionsData, placeholder: string, suggestionsList?: string[] }) => {
         const [inputValue, setInputValue] = useState("");
-        const handleAddItem = () => {
-            const currentItems = data[field] as string[];
-            if(inputValue.trim() && !currentItems.includes(inputValue.trim())) {
-                setData({ ...data, [field]: [...currentItems, inputValue.trim()] });
-                setInputValue("")
+        const [suggestions, setSuggestions] = useState<string[]>([]);
+        const wrapperRef = useRef<HTMLDivElement>(null);
+
+        // 외부 클릭 시 추천 목록 닫기
+        useEffect(() => {
+            function handleClickOutside(event: MouseEvent) {
+                if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                    setSuggestions([]);
+                }
+            }
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => document.removeEventListener("mousedown", handleClickOutside);
+        }, [wrapperRef]);
+
+        const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            setInputValue(value);
+            if (value && suggestionsList) {
+                const filtered = suggestionsList.filter(item =>
+                    item.toLowerCase().includes(value.toLowerCase())
+                );
+                setSuggestions(filtered);
+            } else {
+                setSuggestions([]);
             }
         };
+
+        const handleAddItem = (item: string) => {
+            const currentItems = data[field] as string[];
+            if (item.trim() && !currentItems.includes(item.trim())) {
+                setData({ ...data, [field]: [...currentItems, item.trim()] });
+            }
+            setInputValue("");
+            setSuggestions([]);
+        };
+
         const handleRemoveItem = (itemToRemove: string) => {
             const currentItems = data[field] as string[];
             setData({ ...data, [field]: currentItems.filter((item: string) => item !== itemToRemove) })
         };
+
         return (
-            <div>
+            <div ref={wrapperRef}>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{label}</label>
                 <div className="flex flex-wrap gap-2 mb-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg min-h-[44px] bg-gray-50 dark:bg-gray-800/50">
                     {(data[field] as string[]).map((item: string, i: number) => (
                         <Badge key={i} className="flex items-center gap-1.5 shadow-sm">
                             {item}
-                            <button
-                                className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100 transition-colors"
-                                onClick={() => handleRemoveItem(item)}
-                            >
-                                <X size={12}/>
+                            <button className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100 transition-colors" onClick={() => handleRemoveItem(item)}>
+                                <X size={12} />
                             </button>
                         </Badge>
                     ))}
                 </div>
-                <div className="flex gap-2">
-                    <Input
-                        placeholder={placeholder}
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
-                    />
-                    <Button size="sm" onClick={handleAddItem} className="shadow-sm">
-                        <Plus size={16}/>
-                    </Button>
+                <div className="relative">
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder={placeholder}
+                            value={inputValue}
+                            onChange={handleInputChange}
+                            onKeyPress={(e) => e.key === 'Enter' && handleAddItem(inputValue)}
+                        />
+                        <Button size="sm" onClick={() => handleAddItem(inputValue)} className="shadow-sm"><Plus size={16} /></Button>
+                    </div>
+                    {suggestions.length > 0 && (
+                        <motion.ul
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                        >
+                            {suggestions.map((suggestion, index) => (
+                                <li
+                                    key={index}
+                                    className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    onClick={() => handleAddItem(suggestion)}
+                                >
+                                    {suggestion}
+                                </li>
+                            ))}
+                        </motion.ul>
+                    )}
                 </div>
             </div>
         )
@@ -1266,23 +1312,18 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="희망 조건 수정">
             <div className="space-y-6">
-                <TagInput label="직군 • 직무" field="jobs" placeholder="직무 추가" />
+                <TagInput label="직군 • 직무" field="jobs" placeholder="직무 추가 (예: 개발)" suggestionsList={ALL_JOB_KEYWORDS} />
                 <TagInput label="근무 지역" field="locations" placeholder="지역 추가" />
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">희망 연봉(만원)</label>
-                    <Input
-                        type="number"
-                        value={data.salary}
-                        onChange={(e) => setData({...data, salary: e.target.value})}
-                    />
+                    <Input type="number" value={data.salary} onChange={(e) => setData({ ...data, salary: e.target.value })} />
                 </div>
-                <TagInput label="기타 희망사항" field="others" placeholder="희망사항 추가"/>
+                <TagInput label="기타 희망사항" field="others" placeholder="희망사항 추가" />
             </div>
             <div className="flex gap-3 mt-8 justify-end">
                 <Button variant="outline" onClick={onClose} disabled={isLoading}>취소</Button>
                 <Button onClick={handleSave} className="shadow-md" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    저장
+                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null} 저장
                 </Button>
             </div>
         </Modal>

@@ -39,8 +39,6 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
         document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
     }
 
-    // front_login.tsx의 useEffect 부분을 이것으로 교체
-
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const googleLogin = urlParams.get('googleLogin');
@@ -255,14 +253,14 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
                     id="loginId"
                     value={formData.userId}
                     onChange={(e) => setFormData({...formData, userId: e.target.value})}
-                    className="w-full px-4 py-4 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4] focus:border-[#356ae4] peer pt-6 bg-white/50"
+                    className="w-full px-4 py-4 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:border-[#8b5cf6] peer pt-6 bg-white/50"
                     placeholder=" "
                     required
                     onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                 />
                 <label
                     htmlFor="loginId"
-                    className="absolute text-sm text-slate-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+                    className="absolute text-sm text-slate-500 duration-300 transform -translate-y-3 scale-75 top-4 left-4 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
                 >
                     ID
                 </label>
@@ -275,14 +273,14 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
                     id="loginPw"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full px-4 py-4 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4] focus:border-[#356ae4] peer pt-6 bg-white/50"
+                    className="w-full px-4 py-4 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:border-[#8b5cf6] peer pt-6 bg-white/50"
                     placeholder=" "
                     required
                     onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                 />
                 <label
                     htmlFor="loginPw"
-                    className="absolute text-sm text-slate-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+                    className="absolute text-sm text-slate-500 duration-300 transform -translate-y-3 scale-75 top-4 left-4 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
                 >
                     Password
                 </label>
@@ -293,24 +291,19 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
                 <input
                     type="checkbox"
                     id="remember"
-                    className="h-4 w-4 text-[#356ae4] focus:ring-[#356ae4] border-slate-300 rounded"
+                    className="h-4 w-4 text-[#6366f1] focus:ring-[#6366f1] border-slate-300 rounded"
                 />
                 <label htmlFor="remember" className="ml-2 text-sm text-slate-700">
                     아이디 저장
                 </label>
             </div>
 
-            {/* 🔥 관리자 로그인 안내 */}
-            <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-xs text-blue-700 text-center">
-                    💡 관리자 로그인: admin / admin123!
-                </p>
-            </div>
+
 
             {/* 로그인 버튼 */}
             <motion.button
                 onClick={handleLogin}
-                className="bg-[#356ae4] hover:bg-[#2857c8] text-white py-4 rounded-lg mb-6 transition-all font-semibold disabled:opacity-50"
+                className="bg-[#6366f1] hover:bg-[#8b5cf6] text-white py-4 rounded-lg mb-6 transition-all font-semibold disabled:opacity-50"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={isLoading}
@@ -321,7 +314,7 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
             <div className="text-center mb-6">
                 <Link
                     href="/find-account"
-                    className="text-sm text-gray-600 hover:text-[#356ae4] transition-colors"
+                    className="text-sm text-gray-600 hover:text-[#6366f1] transition-colors"
                 >
                     아이디 · 비밀번호 찾기
                 </Link>
@@ -354,7 +347,7 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
             <div className="text-center text-sm">
                 아직 회원이 아니신가요?{" "}
                 <span
-                    className="text-[#356ae4] cursor-pointer hover:underline font-semibold"
+                    className="text-[#6366f1] cursor-pointer hover:underline font-semibold"
                     onClick={onFlip}
                 >
                     회원가입

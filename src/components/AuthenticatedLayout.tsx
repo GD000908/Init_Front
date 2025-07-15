@@ -43,8 +43,8 @@ export default function AuthenticatedLayout({ children, pathname }: Authenticate
     // 🔥 관리자(ADMIN) 전용 경로
     const adminPaths = ['/admin']
 
-    // 🔥 공개 경로 (인증 불필요)
-    const publicPaths = ['/', '/login', '/signup']
+    // 🔥 공개 경로 (인증 불필요) - find-account 추가
+    const publicPaths = ['/', '/login', '/signup', '/find-account']
 
     // 쿠키 읽기 헬퍼
     const getCookie = (name: string): string | null => {

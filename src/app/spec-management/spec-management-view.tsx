@@ -6,6 +6,7 @@ import {
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "react-intersection-observer"
+
 import * as api from '@/lib/spec-api'
 import { useAuth } from '@/hooks/useAuth' // 🔥 useAuth 훅 추가
 
@@ -100,7 +101,7 @@ const PhoneInput = ({ value, onChange, ...props }: {
 };
 
 
-// --- UI Components Placeholder ---
+// --- UI Components with Dark Mode Support ---
 const Card = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
     <div className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm ${className}`} {...props}>
         {children}
@@ -110,8 +111,21 @@ const Button = ({ className, ...props }: React.ButtonHTMLAttributes<HTMLButtonEl
     <button className={`inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ${className}`} {...props} />
 )
 
-const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => <input className={`flex h-12 w-full rounded-md border bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${props.className}`} {...props} />
-const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea className={`flex min-h-[120px] w-full rounded-md border bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${props.className}`} {...props} />
+// 🔥 Input 컴포넌트에 다크 모드 스타일 적용
+const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+    <input
+        className={`flex h-12 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 ${props.className}`}
+        {...props}
+    />
+)
+
+// 🔥 Textarea 컴포넌트에 다크 모드 스타일 적용 및 우선순위 조정
+const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+    <textarea
+        className={`flex min-h-[120px] w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 resize-y ${props.className || ''}`}
+        {...props}
+    />
+)
 
 // --- Type Definitions ---
 interface ProfileData { name: string; email: string; phone: string; location: string; careerLevel: string; jobTitle: string; introduction: string; }
@@ -209,7 +223,7 @@ function IntroductionCard({ introduction, onSave }: { introduction: string; onSa
                     <AnimatePresence mode="wait">
                         {isEditing ? (
                             <motion.div key="editing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                                <Textarea value={editedIntroduction} onChange={(e) => setEditedIntroduction(e.target.value)} className="min-h-[100px] w-full resize-y" placeholder="자기소개를 입력하세요" />
+                                <Textarea value={editedIntroduction} onChange={(e) => setEditedIntroduction(e.target.value)} className="min-h-[100px] w-full resize-y !bg-white dark:!bg-gray-800 !border-gray-300 dark:!border-gray-600 !text-gray-900 dark:!text-gray-100" placeholder="자기소개를 입력하세요" />
                                 <div className="flex justify-end mt-4 gap-2">
                                     <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2" onClick={handleSave}>저장</Button>
                                 </div>
@@ -240,7 +254,7 @@ function StatCard({ title, value, icon, onSave }: { title: string; value: string
                 {isEditing ? (
                     <div className="mt-2 flex gap-2">
                         <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} autoFocus onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }} />
-                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-3" onClick={handleSave}>저장</Button>
+                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-3" onClick={handleSave}>+</Button>
                     </div>
                 ) : (<p className="mt-2 text-xl font-semibold text-gray-800 dark:text-gray-100 cursor-pointer hover:text-indigo-600" onClick={() => setIsEditing(true)}>{value}</p>)}
             </Card>
@@ -263,6 +277,7 @@ function Section({ title, icon, children, isActive, onClick }: { title: string; 
     );
 }
 
+// 🔥 GenericForm 컴포넌트 - Select와 Textarea에 다크 모드 스타일 적용
 const GenericForm = ({ title, onSave, onClose, fields, initialData }: any) => {
     const [data, setData] = useState(initialData.length > 0 ? initialData : [{id: Date.now().toString()}]);
     const updateField = (index: number, fieldName: string, value: any) => { const newData = [...data]; newData[index] = { ...newData[index], [fieldName]: value }; setData(newData); };
@@ -271,17 +286,17 @@ const GenericForm = ({ title, onSave, onClose, fields, initialData }: any) => {
     return (
         <div className="space-y-6">
             {data.map((item: any, index: number) => (
-                <div key={item.id} className="space-y-4 border rounded-xl p-4 relative">
-                    <h3 className="text-sm font-medium">{title} #{index + 1}</h3>
+                <div key={item.id} className="space-y-4 border border-gray-200 dark:border-gray-700 rounded-xl p-4 relative bg-gray-50 dark:bg-gray-800/50">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{title} #{index + 1}</h3>
                     {data.length > 1 && (<Button className="absolute top-2 right-2 text-red-500 hover:text-red-600" onClick={() => removeItem(index)}><Trash2 className="w-4 h-4" /></Button>)}
                     {fields.map((field: any) => (
                         <div key={field.name} className="space-y-2">
-                            <label className="text-sm font-medium">{field.label}</label>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
                             {field.type === 'select' ? (
                                 <select
                                     value={item[field.name] || ''}
                                     onChange={(e) => updateField(index, field.name, e.target.value)}
-                                    className="flex h-12 w-full rounded-md border bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-12 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 text-sm focus-visible:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <option value="" disabled>{field.placeholder || '선택하세요'}</option>
                                     {field.options.map((option: string) => (
@@ -289,7 +304,7 @@ const GenericForm = ({ title, onSave, onClose, fields, initialData }: any) => {
                                     ))}
                                 </select>
                             ) : field.name === 'description' ? (
-                                <Textarea placeholder={field.placeholder} value={item[field.name] || ''} onChange={(e) => updateField(index, field.name, e.target.value)} className="min-h-[100px] w-full resize-y" />
+                                <Textarea placeholder={field.placeholder} value={item[field.name] || ''} onChange={(e) => updateField(index, field.name, e.target.value)} className="min-h-[100px] w-full resize-y !bg-white dark:!bg-gray-800 !border-gray-300 dark:!border-gray-600 !text-gray-900 dark:!text-gray-100" />
                             ) : (
                                 <Input type={field.type || 'text'} placeholder={field.placeholder} value={item[field.name] || ''} onChange={(e) => updateField(index, field.name, e.target.value)} />
                             )}
@@ -298,7 +313,7 @@ const GenericForm = ({ title, onSave, onClose, fields, initialData }: any) => {
                 </div>
             ))}
             <div className="flex justify-center"><Button className="w-full text-indigo-600 border-indigo-200 hover:bg-indigo-50 px-4 py-2" onClick={addItem}><Plus className="w-4 h-4 mr-2" /> {title} 추가</Button></div>
-            <div className="flex justify-end gap-2 pt-4 border-t"><Button className="px-4 py-2" onClick={onClose}>취소</Button><Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2" onClick={() => onSave(data)}>저장</Button></div>
+            <div className="flex justify-end gap-2 pt-4 border-t dark:border-gray-700"><Button className="px-4 py-2" onClick={onClose}>취소</Button><Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2" onClick={() => onSave(data)}>저장</Button></div>
         </div>
     );
 };
@@ -313,7 +328,7 @@ const SkillsForm = ({ initialSkills, onSave, onClose }: { initialSkills: string[
         <div className="space-y-4">
             <div className="flex items-center gap-2"><Input type="text" placeholder="새로운 스킬을 입력하세요" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={handleKeyDown} /><Button className="bg-indigo-600 text-white px-4 py-2" onClick={addSkill}>추가</Button></div>
             <div className="flex flex-wrap gap-2 pt-2"><AnimatePresence>{skills.map((skill) => (<SkillTag key={skill} skill={skill} onRemove={removeSkill} />))}</AnimatePresence></div>
-            <div className="flex justify-end gap-2 pt-4 border-t"><Button className="px-4 py-2" onClick={onClose}>취소</Button><Button className="bg-indigo-600 text-white px-4 py-2" onClick={() => onSave(skills)}>저장</Button></div>
+            <div className="flex justify-end gap-2 pt-4 border-t dark:border-gray-700"><Button className="px-4 py-2" onClick={onClose}>취소</Button><Button className="bg-indigo-600 text-white px-4 py-2" onClick={() => onSave(skills)}>저장</Button></div>
         </div>
     );
 };
@@ -333,20 +348,21 @@ const ProfileEditPanel = ({ isOpen, onClose, profileData, initialSkills, onSave 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80"><motion.div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto" initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}>
-            <div className="flex items-center justify-between mb-6"><h2 className="text-xl font-semibold">프로필 수정</h2><Button onClick={onClose}><X className="w-5 h-5" /></Button></div>
+            <div className="flex items-center justify-between mb-6"><h2 className="text-xl font-semibold dark:text-gray-100">프로필 수정</h2><Button onClick={onClose}><X className="w-5 h-5" /></Button></div>
             <div className="space-y-6">
-                <div><label className="text-sm font-medium block mb-2">이름</label><Input value={editedProfile.name} onChange={(e) => handleChange('name', e.target.value)} /></div>
-                <div><label className="text-sm font-medium block mb-2">이메일</label><Input type="email" value={editedProfile.email} onChange={(e) => handleChange('email', e.target.value)} /></div>
-                <PhoneInput
-                    value={editedProfile.phone}
-                    onChange={(formattedPhone) => setEditedProfile(prev => ({ ...prev, phone: formattedPhone }))}
-                />
-                <div><label className="text-sm font-medium block mb-2">거주지</label><Input value={editedProfile.location} onChange={(e) => handleChange('location', e.target.value)} /></div>
-                <div><label className="text-sm font-medium block mb-2">경력</label><Input value={editedProfile.careerLevel} onChange={(e) => handleChange('careerLevel', e.target.value)} /></div>
-                <div><label className="text-sm font-medium block mb-2">직무</label><Input value={editedProfile.jobTitle} onChange={(e) => handleChange('jobTitle', e.target.value)} /></div>
-                <div className="pt-4 border-t"><label className="text-sm font-medium block mb-2">주요 스택</label><div className="flex items-center gap-2"><Input placeholder="스킬 추가" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={handleKeyDown}/><Button className="bg-indigo-600 text-white whitespace-nowrap px-4 py-2" onClick={addSkill}>추가</Button></div><div className="flex flex-wrap gap-2 mt-3"><AnimatePresence>{editedSkills.map((skill) => (<SkillTag key={skill} skill={skill} onRemove={removeSkill} />))}</AnimatePresence></div></div>
+                <div><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">이름</label><Input value={editedProfile.name} onChange={(e) => handleChange('name', e.target.value)} /></div>
+                <div><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">이메일</label><Input type="email" value={editedProfile.email} onChange={(e) => handleChange('email', e.target.value)} /></div>
+                <div><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">연락처</label>
+                    <PhoneInput
+                        value={editedProfile.phone}
+                        onChange={(formattedPhone) => setEditedProfile(prev => ({ ...prev, phone: formattedPhone }))}
+                    /></div>
+                <div><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">거주지</label><Input value={editedProfile.location} onChange={(e) => handleChange('location', e.target.value)} /></div>
+                <div><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">경력</label><Input value={editedProfile.careerLevel} onChange={(e) => handleChange('careerLevel', e.target.value)} /></div>
+                <div><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">직무</label><Input value={editedProfile.jobTitle} onChange={(e) => handleChange('jobTitle', e.target.value)} /></div>
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700"><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">주요 스택</label><div className="flex items-center gap-2"><Input placeholder="스킬 추가" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={handleKeyDown}/><Button className="bg-indigo-600 text-white whitespace-nowrap px-4 py-2" onClick={addSkill}>추가</Button></div><div className="flex flex-wrap gap-2 mt-3"><AnimatePresence>{editedSkills.map((skill) => (<SkillTag key={skill} skill={skill} onRemove={removeSkill} />))}</AnimatePresence></div></div>
             </div>
-            <div className="mt-8 flex justify-end gap-2"><Button className="px-4 py-2" onClick={onClose}>취소</Button><Button className="bg-indigo-600 text-white px-4 py-2" onClick={handleSaveClick}>저장</Button></div>
+            <div className="mt-8 flex justify-end gap-2"><Button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" onClick={onClose}>취소</Button><Button className="bg-indigo-600 text-white px-4 py-2" onClick={handleSaveClick}>저장</Button></div>
         </motion.div></div>
     );
 };

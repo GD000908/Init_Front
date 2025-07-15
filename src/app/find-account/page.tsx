@@ -14,7 +14,7 @@ export default function FindAccountPage() {
             <div className="w-full max-w-md">
                 {/* 헤더 */}
                 <div className="text-center mb-8">
-                    <Link href="/login" className="inline-block">
+                    <Link href="/" className="inline-block">
                         <h1 className="text-4xl font-bold text-[#555555] hover:scale-105 transition-transform">
                             Init
                         </h1>
