@@ -1,6 +1,7 @@
 // src/lib/spec-api.ts
 
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+
 
 // =============================================================================
 // 타입 정의 (기존 컴포넌트와 호환)

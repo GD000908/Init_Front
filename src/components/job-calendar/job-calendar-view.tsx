@@ -78,7 +78,8 @@ interface ApiResponse<T> {
 
 // API 서비스 클래스
 class JobPostingApi {
-    private API_BASE_URL = 'http://localhost:8080/api/job-calendar';
+    private API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/job-calendar`;
+
 
     private async request<T>(endpoint: string, options?: RequestInit & { userId?: string }): Promise<T> {
         const url = `${this.API_BASE_URL}${endpoint}`;

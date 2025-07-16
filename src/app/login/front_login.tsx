@@ -142,7 +142,8 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
         setIsLoading(true)
 
         try {
-            const res = await fetch("http://localhost:8080/api/login", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
+
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
@@ -338,7 +339,8 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
                     onClick={() => {
                         console.log('🔍 구글 로그인 버튼 클릭');
                         // 🔥 올바른 OAuth2 엔드포인트로 이동
-                        window.location.href = "http://localhost:8080/oauth2/authorization/google"
+                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/google`;
+
                     }}
                 />
             </div>

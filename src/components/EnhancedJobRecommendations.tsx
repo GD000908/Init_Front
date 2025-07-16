@@ -140,7 +140,8 @@ const searchPublicJobs = async (filters: SearchFilters, pageNo: number = 1) => {
         throw new Error('인증 토큰이 없습니다.')
     }
 
-    const response = await fetch(`http://localhost:8080/api/public-jobs/search`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public-jobs/search`, {
+
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -178,7 +179,8 @@ const getJobRecommendations = async (
             throw new Error('인증 토큰이 없습니다.')
         }
 
-        const response = await fetch(`http://localhost:8080/api/home/job-recommendations/${userId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/home/job-recommendations/${userId}`, {
+
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

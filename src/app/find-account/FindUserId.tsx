@@ -28,7 +28,8 @@ export default function FindUserId() {
         try {
             console.log('🔍 아이디 찾기 시작:', email); // 디버깅용 로그
 
-            const response = await fetch("http://localhost:8080/api/find-userid", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/find-userid`, {
+
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
