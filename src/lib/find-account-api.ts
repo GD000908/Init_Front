@@ -1,7 +1,6 @@
 // lib/find-account-api.ts
 const API_BASE_URL = 'http://localhost:8080/api';
 
-
 export const findAccountApi = {
     /**
      * 아이디 찾기

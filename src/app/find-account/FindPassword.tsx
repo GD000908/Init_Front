@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Loader2, Lock, CheckCircle, AlertCircle, Eye, EyeOff, Shield } from "lucide-react"
+import { findAccountApi } from "@/lib/find-account-api"
 
 type Step = "input" | "verify" | "reset" | "complete"
 
@@ -45,26 +46,18 @@ export default function FindPassword() {
         setError("")
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-password-reset-code`, {
-
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `userId=${encodeURIComponent(formData.userId)}&email=${encodeURIComponent(formData.email)}`,
-                credentials: "include"
-            })
-
-            if (response.ok) {
-                setStep("verify")
-                setError("")
-            } else {
-                const errorMessage = await response.text()
-                setError(errorMessage)
-            }
+            await findAccountApi.sendPasswordResetCode(formData.userId, formData.email);
+            setStep("verify")
+            setError("")
         } catch (error) {
             console.error("인증 코드 발송 오류:", error)
-            setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
+
+            let errorMessage = "인증 코드 발송에 실패했습니다.";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            setError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -81,26 +74,18 @@ export default function FindPassword() {
         setError("")
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/verify-password-reset-code`, {
-
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `userId=${encodeURIComponent(formData.userId)}&email=${encodeURIComponent(formData.email)}&code=${encodeURIComponent(formData.verificationCode)}`,
-                credentials: "include"
-            })
-
-            if (response.ok) {
-                setStep("reset")
-                setError("")
-            } else {
-                const errorMessage = await response.text()
-                setError(errorMessage)
-            }
+            await findAccountApi.verifyPasswordResetCode(formData.userId, formData.email, formData.verificationCode);
+            setStep("reset")
+            setError("")
         } catch (error) {
             console.error("인증 코드 확인 오류:", error)
-            setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
+
+            let errorMessage = "인증 코드 확인에 실패했습니다.";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            setError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -122,26 +107,18 @@ export default function FindPassword() {
         setError("")
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reset-password`, {
-
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `userId=${encodeURIComponent(formData.userId)}&email=${encodeURIComponent(formData.email)}&newPassword=${encodeURIComponent(formData.newPassword)}`,
-                credentials: "include"
-            })
-
-            if (response.ok) {
-                setStep("complete")
-                setError("")
-            } else {
-                const errorMessage = await response.text()
-                setError(errorMessage)
-            }
+            await findAccountApi.resetPassword(formData.userId, formData.email, formData.newPassword);
+            setStep("complete")
+            setError("")
         } catch (error) {
             console.error("비밀번호 재설정 오류:", error)
-            setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
+
+            let errorMessage = "비밀번호 재설정에 실패했습니다.";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            setError(errorMessage)
         } finally {
             setIsLoading(false)
         }
