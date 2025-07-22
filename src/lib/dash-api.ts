@@ -1,7 +1,7 @@
 // lib/dash-api.ts
 // 홈 대시보드 페이지 API 클라이언트 (공고 검색 기능 추가)
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:8080';
 
 // =============================================================================
 // 타입 정의
