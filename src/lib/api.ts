@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
+const API_BASE_URL = `https://initback-production-67bf.up.railway.app/api`;
+
 
 
 class ApiClient {

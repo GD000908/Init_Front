@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API 디버깅</title>
+</head>
+<body>
+    <h1>백엔드 API 연결 테스트</h1>
+    <button onclick="testApi()">API 테스트</button>
+    <div id="result"></div>
+
+    <script>
+        async function testApi() {
+            const resultDiv = document.getElementById('result');
+            const baseUrl = 'https://initback-production-67bf.up.railway.app';
+            
+            // 테스트할 엔드포인트들
+            const endpoints = [
+                '/api',
+                '/api/health',
+                '/health',
+                '/api/check-userid/test',
+                '/check-userid/test',
+                '/api/resumes',
+                '/resumes',
+                '/api/spec/1',
+                '/spec/1'
+            ];
+            
+            resultDiv.innerHTML = '<h3>테스트 결과:</h3>';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    console.log(`Testing: ${baseUrl}${endpoint}`);
+                    const response = await fetch(`${baseUrl}${endpoint}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    resultDiv.innerHTML += `<p>${endpoint}: ${response.status} ${response.statusText}</p>`;
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        console.log(`Success ${endpoint}:`, text.substring(0, 200));
+                    }
+                    
+                } catch (error) {
+                    resultDiv.innerHTML += `<p>${endpoint}: ERROR - ${error.message}</p>`;
+                    console.error(`Error ${endpoint}:`, error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

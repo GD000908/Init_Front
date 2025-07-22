@@ -28,7 +28,7 @@ export default function FindUserId() {
         try {
             console.log('🔍 아이디 찾기 시작:', email); // 디버깅용 로그
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/find-userid`, {
+            const response = await fetch(`https://initback-production-67bf.up.railway.app/api/find-userid`, {
 
 
                 method: "POST",
