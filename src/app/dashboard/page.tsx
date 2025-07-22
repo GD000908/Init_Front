@@ -19,7 +19,8 @@ import EnhancedJobRecommendations from '@/components/EnhancedJobRecommendations'
 
 // API 기본 URL
 //const API_BASE_URL = 'http://localhost:8080/api/home';
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/home`;
+const API_BASE_URL = "https://initback-production-67bf.up.railway.app/api/home";
+
 
 // 유틸리티 함수
 const cn = (...inputs: any[]) => {
