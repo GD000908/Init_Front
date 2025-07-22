@@ -15,12 +15,11 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import EnhancedJobRecommendations from '@/components/EnhancedJobRecommendations'
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+
 
 // API 기본 URL
 //const API_BASE_URL = 'http://localhost:8080/api/home';
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL + '/api/home';
-
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/home`;
 
 // 유틸리티 함수
 const cn = (...inputs: any[]) => {

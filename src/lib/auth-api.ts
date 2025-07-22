@@ -1,5 +1,6 @@
 // lib/auth-api.ts
-const API_BASE_URL = `http://localhost:8080/api`;
+//const API_BASE_URL = `http://localhost:8080/api`;
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 
 
 export const authApi = {
