@@ -57,6 +57,13 @@ export default function GlobalSidebar() {
     loadThemePreference();
   }, []);
 
+  // 🔥 페이지 이동 시에도 다크모드 상태 확인
+  useEffect(() => {
+    if (isMounted) {
+      loadThemePreference();
+    }
+  }, [pathname, isMounted]);
+
   const getCookie = (name: string): string | null => {
     try {
       const value = `; ${document.cookie}`;
@@ -90,22 +97,63 @@ export default function GlobalSidebar() {
 
   const loadThemePreference = () => {
     try {
+      // 🔥 localStorage와 documentElement 클래스 모두 확인
       const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
+      const hasCurrentDarkClass = document.documentElement.classList.contains('dark');
+
+      console.log('🎨 Theme check:', { savedTheme, hasCurrentDarkClass, pathname });
+
+      // localStorage에 저장된 테마가 dark이거나, 현재 DOM에 dark 클래스가 있는 경우
+      const shouldBeDark = savedTheme === 'dark' || hasCurrentDarkClass;
+
+      if (shouldBeDark) {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
+      } else {
+        setIsDarkMode(false);
+        document.documentElement.classList.remove('dark');
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error('❌ Theme load error:', error);
+    }
   };
 
   const toggleTheme = () => {
     const newDarkMode = !isDarkMode;
+    console.log('🔄 Toggling theme:', { from: isDarkMode, to: newDarkMode });
+
     setIsDarkMode(newDarkMode);
-    document.documentElement.classList.toggle('dark', newDarkMode);
-    try {
-      localStorage.setItem('theme', newDarkMode ? 'dark' : 'light');
-    } catch (error) {}
+
+    // 🔥 DOM 클래스와 localStorage 모두 즉시 업데이트
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+
+    // 🔥 다른 탭/창에서도 동기화되도록 storage 이벤트 발생
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'theme',
+      newValue: newDarkMode ? 'dark' : 'light',
+      storageArea: localStorage
+    }));
   };
+
+  // 🔥 다른 탭에서 테마 변경 시 동기화
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'theme' && e.newValue) {
+        const isDark = e.newValue === 'dark';
+        setIsDarkMode(isDark);
+        document.documentElement.classList.toggle('dark', isDark);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleLogout = () => {
     try {
