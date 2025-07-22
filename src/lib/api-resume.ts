@@ -1,6 +1,6 @@
 //const API_BASE_URL = `http://localhost:8080/api`;
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 
 class ResumeApiClient {
     private baseURL: string;
@@ -363,4 +363,4 @@ export interface ResumeUpdateRequest {
     languages?: LanguageUpdateRequest[];
 }
 
-export const resumeApiClient = new ResumeApiClient(process.env.NEXT_PUBLIC_BASE_URL!);
+export const resumeApiClient = new ResumeApiClient(API_BASE_URL);
