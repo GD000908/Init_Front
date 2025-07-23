@@ -54,7 +54,7 @@
   position: fixed;
   left: 0;
   top: 0;
-  height: 100vh;
+  height: 100dvh; /* ✅ 동적 뷰포트 높이로 수정 */
   width: 280px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
@@ -63,8 +63,9 @@
   z-index: 1000;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  overflow-y: auto; /* 스크롤 가능하도록 */
+  overflow-y: auto; /* 전체 사이드바 스크롤 */
 }
+
 
 .sidebar.dark {
   background: #1f2937;
@@ -151,12 +152,12 @@
    Navigation
    ================================================================ */
 .nav {
-  flex: 1;
+  flex: none; /* ✅ flex: 1 제거해서 고정 크기 */
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* 내비게이션 영역 스크롤 */
-  min-height: 0; /* 플렉스 스크롤을 위해 필요 */
+  overflow-y: visible; /* ✅ nav 스크롤 제거 */
+  min-height: 0;
 }
 
 .menuList {
@@ -397,7 +398,10 @@
 
   /* 기본적으로 사이드바 숨김 */
   .sidebar {
+    height: 100dvh;
     transform: translateX(-100%);
+    max-height: calc(100vh - 60px); /* 하단바 여유 공간 */
+    padding-bottom: 80px; /* 로그아웃 버튼까지 스크롤 가능하도록 */
   }
 
   /* 모바일에서 메뉴가 열렸을 때 */
