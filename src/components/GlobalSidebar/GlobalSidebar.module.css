@@ -54,7 +54,7 @@
   position: fixed;
   left: 0;
   top: 0;
-  height: 100vh; /* ✅ 데스크탑은 기존 100vh 유지 */
+  height: 100vh;
   width: 280px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
@@ -63,9 +63,9 @@
   z-index: 1000;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  overflow-y: auto; /* 전체 사이드바 스크롤 */
+  /* 🔥 웹에서는 스크롤 없음, 모바일에서만 스크롤 */
+  overflow-y: visible;
 }
-
 
 .sidebar.dark {
   background: #1f2937;
@@ -152,11 +152,12 @@
    Navigation
    ================================================================ */
 .nav {
-  flex: none; /* ✅ flex: 1 제거해서 고정 크기 */
+  /* 🔥 웹에서는 flex: none으로 고정 크기, 모바일에서만 flex: 1 */
+  flex: none;
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  overflow-y: visible; /* ✅ nav 스크롤 제거 */
+  overflow-y: visible;
   min-height: 0;
 }
 
@@ -238,9 +239,11 @@
    User Profile
    ================================================================ */
 .userProfile {
+  /* 🔥 웹에서는 nav 바로 아래에 위치, 모바일에서만 하단 고정 */
   padding: 20px;
   border-top: 1px solid #e5e7eb;
-  flex-shrink: 0; /* 스크롤 시 고정 */
+  flex-shrink: 0;
+  margin-top: 16px; /* nav와 간격 추가 */
 }
 
 .sidebar.dark .userProfile {
@@ -333,9 +336,11 @@
    Logout Section
    ================================================================ */
 .logoutSection {
+  /* 🔥 웹에서는 userProfile 바로 아래, 모바일에서만 하단 고정 */
   padding: 16px 20px;
   border-top: 1px solid #e5e7eb;
-  flex-shrink: 0; /* 스크롤 시 고정 */
+  flex-shrink: 0;
+  margin-top: 8px; /* userProfile과 간격 */
 }
 
 .sidebar.dark .logoutSection {
@@ -360,7 +365,7 @@
 }
 
 /* ================================================================
-   스크롤바 스타일링
+   스크롤바 스타일링 (모바일에서만 사용)
    ================================================================ */
 .sidebar::-webkit-scrollbar {
   width: 6px;
@@ -399,7 +404,30 @@
   /* 기본적으로 사이드바 숨김 */
   .sidebar {
     transform: translateX(-100%);
-    padding-bottom: 80px; /* 로그아웃 버튼까지 스크롤 가능하도록 */
+    /* 🔥 모바일에서만 스크롤 활성화 */
+    overflow-y: auto;
+    padding-bottom: 20px; /* 하단 여백 추가 */
+  }
+
+  /* 🔥 모바일에서는 nav가 남은 공간 차지 */
+  .nav {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* 🔥 모바일에서 userProfile과 logoutSection은 하단 고정 */
+  .userProfile {
+    margin-top: auto; /* 가능한 아래로 밀어내기 */
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .sidebar.dark .userProfile {
+    border-top-color: #374151;
+  }
+
+  .logoutSection {
+    margin-top: 0; /* 모바일에서는 바로 붙이기 */
+    border-top: none; /* 중복 border 제거 */
   }
 
   /* 모바일에서 메뉴가 열렸을 때 */

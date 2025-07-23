@@ -1,7 +1,7 @@
 .pageContainer {
   min-height: 100vh;
   background: #f8fafc;
-  margin-left: 280px;
+  margin-left: 18px;
   transition: background-color 0.3s ease;
 }
 
@@ -768,6 +768,108 @@
   background: #64748b;
 }
 
+/* 기존 768px 미디어 쿼리를 1023px로 확장 */
+@media (max-width: 1023px) {
+  .pageContainer {
+    margin-left: 0;
+  }
+
+  .mainWrapper {
+    padding-right: 0;
+  }
+
+  .pageHeaderInline {
+    padding: 20px 16px 16px 16px;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .titleIcon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .pageDescription {
+    font-size: 0.875rem;
+  }
+
+  .resumePage {
+    padding: 0 16px 40px 16px;
+  }
+
+  .mainLayout {
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 16px;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    position: static;
+    border-radius: 12px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .sidebarButton {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .resume {
+    padding: 24px;
+    max-width: 100%;
+    min-width: auto;
+  }
+
+  .titleInput {
+    font-size: 18px;
+    padding: 14px 16px;
+  }
+
+  .questionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .questionTitleInput {
+    width: 100%;
+  }
+
+  .content {
+    height: 250px;
+    padding: 14px 16px;
+  }
+
+  .saveSidebar {
+    position: static;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .modalContent {
+    padding: 24px;
+    width: 95%;
+  }
+
+  .modalContent h2 {
+    font-size: 18px;
+  }
+}
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {

@@ -1800,7 +1800,7 @@ export default function CareerLogHomePage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-black dark:via-gray-950 dark:to-black text-gray-800 dark:text-gray-200">
-            <main className="ml-0 lg:ml-[280px] p-4 lg:p-8 transition-all duration-300">
+            <main className="ml-0 min-[1024px]:ml-[280px] p-4 lg:p-8 transition-all duration-300">
                 <div className="w-full space-y-6">
                     <Header userName={userName} />
 

@@ -607,14 +607,14 @@ export default function JobCalendarView() {
             className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
         >
             {/* 헤더 */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
                 <div className="min-w-0 flex-1"> {/* 텍스트 영역 */}
                     <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
-                        <span>📅 공고 캘린더</span>
+                        <span className="whitespace-nowrap">📅 공고 캘린더</span>
                         {userName && (
                             <span className="text-xs sm:text-sm text-gray-500 ml-1 sm:ml-2 whitespace-nowrap">
-            ({userName}님)
-        </span>
+                    ({userName}님)
+                </span>
                         )}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs sm:text-sm">
@@ -622,7 +622,7 @@ export default function JobCalendarView() {
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 lg:gap-3 flex-shrink-0">
                     <div className="text-xs text-gray-600 dark:text-gray-400 text-center sm:text-left">
                         진행중 {activeCount}개 · 마감됨 {expiredCount}개
                     </div>
@@ -782,7 +782,7 @@ export default function JobCalendarView() {
             {/* 북마크 목록 모달 */}
             <Dialog open={showBookmarkModal} onOpenChange={setShowBookmarkModal}>
                 <DialogContent
-                    className="mx-4 w-[calc(100vw-2rem)] sm:mx-auto sm:w-full sm:max-w-[600px] max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                    className="mx-2 w-[calc(100vw-1rem)] sm:mx-4 sm:w-[calc(100vw-2rem)] md:mx-auto md:w-full md:max-w-[500px] lg:max-w-[600px] max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
                     <DialogHeader>
                         <DialogTitle
                             className="flex items-center text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -818,7 +818,7 @@ export default function JobCalendarView() {
             {/* 이벤트 상세 정보 모달 */}
             <Dialog open={showEventDetails} onOpenChange={setShowEventDetails}>
                 <DialogContent
-                    className="mx-4 w-[calc(100vw-2rem)] sm:mx-auto sm:w-full sm:max-w-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                    className="mx-2 w-[calc(100vw-1rem)] sm:mx-4 sm:w-[calc(100vw-2rem)] md:mx-auto md:w-full md:max-w-[400px] lg:max-w-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
                     {selectedEvent && (
                         <>
                             <DialogHeader>
@@ -925,7 +925,7 @@ export default function JobCalendarView() {
             {/* 편집 모달 */}
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
                 <DialogContent
-                    className="mx-4 w-[calc(100vw-2rem)] sm:mx-auto sm:w-full sm:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                    className="mx-2 w-[calc(100vw-1rem)] sm:mx-4 sm:w-[calc(100vw-2rem)] md:mx-auto md:w-full md:max-w-[500px] lg:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
                     {editingCompany && (
                         <>
                             <DialogHeader>
