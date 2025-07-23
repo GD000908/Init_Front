@@ -9,7 +9,7 @@ export default function LoginPage() {
     const searchParams = useSearchParams()
     const signupParam = searchParams.get("signup")
 
-    // ✅ 초기값에서 바로 쿼리 파라미터 반영
+    // 초기값에서 바로 쿼리 파라미터 반영
     const [isFlipped, setIsFlipped] = useState(signupParam === "true")
 
     const [showPassword, setShowPassword] = useState(false)
@@ -40,8 +40,26 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="relative perspective w-[520px]">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 relative overflow-hidden px-4 py-8">
+            {/* 배경 장식 요소들 - 반응형 크기 조정 */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* 모바일: 작은 크기, 데스크톱: 큰 크기 */}
+                <div className="absolute top-1/4 left-1/4 w-32 h-32 md:w-64 md:h-64 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-10 blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 md:w-96 md:h-96 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full opacity-10 blur-3xl animate-pulse" style={{animationDelay: "1s"}}></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 md:w-80 md:h-80 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full opacity-5 blur-3xl animate-pulse" style={{animationDelay: "2s"}}></div>
+
+                {/* 추가 장식 요소들 - 반응형 */}
+                <div className="absolute top-10 right-10 w-16 h-16 md:w-32 md:h-32 bg-gradient-to-r from-violet-300 to-purple-300 rounded-full opacity-15 blur-2xl"></div>
+                <div className="absolute bottom-10 left-10 w-20 h-20 md:w-40 md:h-40 bg-gradient-to-r from-pink-300 to-rose-300 rounded-full opacity-15 blur-2xl"></div>
+
+                {/* 미묘한 점들 */}
+                <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-purple-400 rounded-full opacity-20"></div>
+                <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-indigo-400 rounded-full opacity-30"></div>
+                <div className="absolute top-2/3 left-1/4 w-1.5 h-1.5 bg-pink-400 rounded-full opacity-25"></div>
+            </div>
+
+            {/* 반응형 컨테이너 - 로그인/회원가입 모두 동일한 크기 */}
+            <div className="relative w-full max-w-md mx-auto z-10" style={{ perspective: '1000px' }}>
                 <div
                     className="relative w-full transition-transform duration-700"
                     style={{
@@ -51,7 +69,7 @@ export default function LoginPage() {
                 >
                     {/* 앞면: 로그인 */}
                     <div
-                        className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]"
+                        className="w-full"
                         style={{backfaceVisibility: "hidden"}}
                     >
                         <LoginForm onFlip={() => setIsFlipped(true)}/>
@@ -59,10 +77,10 @@ export default function LoginPage() {
 
                     {/* 뒷면: 회원가입 */}
                     <div
-                        className="absolute left-1/2 top-1/2"
+                        className="absolute top-0 left-0 w-full"
                         style={{
                             backfaceVisibility: "hidden",
-                            transform: "translate(-50%, -50%) rotateY(180deg)",
+                            transform: "rotateY(180deg)",
                         }}
                     >
                         <SignupForm
