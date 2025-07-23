@@ -54,7 +54,7 @@
   position: fixed;
   left: 0;
   top: 0;
-  height: 100vh;
+  height: 100vh; /* ✅ 데스크탑은 기존 100vh 유지 */
   width: 280px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
@@ -398,9 +398,7 @@
 
   /* 기본적으로 사이드바 숨김 */
   .sidebar {
-    height: 100dvh;
     transform: translateX(-100%);
-    max-height: calc(100vh - 60px); /* 하단바 여유 공간 */
     padding-bottom: 80px; /* 로그아웃 버튼까지 스크롤 가능하도록 */
   }
 
