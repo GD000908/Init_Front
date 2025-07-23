@@ -58,8 +58,12 @@ export default function LoginPage() {
                 <div className="absolute top-2/3 left-1/4 w-1.5 h-1.5 bg-pink-400 rounded-full opacity-25"></div>
             </div>
 
-            {/* 컨테이너를 flex로 중앙 정렬하되 스크롤 가능하게 */}
-            <div className="flex items-center justify-center min-h-screen sm:items-start sm:pt-16">
+            {/* 컨테이너 - 로그인은 중앙, 회원가입은 상단 */}
+            <div className={`flex justify-center min-h-screen transition-all duration-700 ${
+                isFlipped
+                    ? 'items-start pt-8 sm:pt-16'
+                    : 'items-center'
+            }`}>
                 {/* 반응형 컨테이너 - 로그인/회원가입 모두 동일한 크기 */}
                 <div className="relative w-full max-w-md mx-auto z-10" style={{ perspective: '1000px' }}>
                     <div

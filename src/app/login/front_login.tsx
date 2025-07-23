@@ -104,9 +104,9 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
 
     return (
         <motion.div
-            className="w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl
-                       p-4 sm:p-6 md:p-8 lg:p-10
-                       min-h-[500px] sm:min-h-[550px] md:min-h-[600px] lg:min-h-[650px]
+            className="w-full max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl
+                       p-4 sm:p-6 md:p-8
+                       h-[600px] sm:h-[650px]
                        flex flex-col justify-center"
             style={{ backfaceVisibility: "hidden" }}
             initial={{ opacity: 0, y: 20 }}
@@ -115,33 +115,33 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
         >
             <Link
                 href="/"
-                className="logo text-3xl sm:text-4xl md:text-5xl lg:text-6xl
+                className="logo text-3xl sm:text-4xl md:text-5xl
                          font-bold text-[#555555] text-center
-                         mb-6 sm:mb-7 md:mb-8 lg:mb-10
+                         mb-6 sm:mb-7 md:mb-8
                          hover:scale-105 transition-transform"
             >
                 Init
             </Link>
 
             {/* ID 필드 */}
-            <div className="form-floating relative mb-4 sm:mb-5 md:mb-6">
+            <div className="form-floating relative mb-4 sm:mb-5">
                 <input
                     type="text"
                     id="loginId"
                     value={formData.userId}
                     onChange={(e) => setFormData({...formData, userId: e.target.value})}
-                    className="w-full px-3 sm:px-4 py-3 sm:py-4 md:py-5
+                    className="w-full px-3 sm:px-4 py-3 sm:py-4
                              border border-slate-300 rounded-lg
                              focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:border-[#8b5cf6]
                              peer pt-5 sm:pt-6 bg-white/50
-                             text-sm sm:text-base md:text-lg"
+                             text-sm sm:text-base"
                     placeholder=" "
                     required
                     onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                 />
                 <label
                     htmlFor="loginId"
-                    className="absolute text-xs sm:text-sm md:text-base text-slate-500
+                    className="absolute text-xs sm:text-sm text-slate-500
                              duration-300 transform -translate-y-3 scale-75
                              top-3 sm:top-4 left-3 sm:left-4 origin-[0]
                              peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0
@@ -152,24 +152,24 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
             </div>
 
             {/* Password 필드 */}
-            <div className="form-floating relative mb-4 sm:mb-5 md:mb-6">
+            <div className="form-floating relative mb-4 sm:mb-5">
                 <input
                     type="password"
                     id="loginPw"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full px-3 sm:px-4 py-3 sm:py-4 md:py-5
+                    className="w-full px-3 sm:px-4 py-3 sm:py-4
                              border border-slate-300 rounded-lg
                              focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:border-[#8b5cf6]
                              peer pt-5 sm:pt-6 bg-white/50
-                             text-sm sm:text-base md:text-lg"
+                             text-sm sm:text-base"
                     placeholder=" "
                     required
                     onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                 />
                 <label
                     htmlFor="loginPw"
-                    className="absolute text-xs sm:text-sm md:text-base text-slate-500
+                    className="absolute text-xs sm:text-sm text-slate-500
                              duration-300 transform -translate-y-3 scale-75
                              top-3 sm:top-4 left-3 sm:left-4 origin-[0]
                              peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0
@@ -180,20 +180,20 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
             </div>
 
             {/* Remember me */}
-            <div className="remember flex items-center justify-between mb-4 sm:mb-5 md:mb-6">
+            <div className="remember flex items-center justify-between mb-4 sm:mb-5">
                 <label className="flex items-center">
                     <input
                         type="checkbox"
                         id="remember"
                         className="h-3 w-3 sm:h-4 sm:w-4 text-[#6366f1] focus:ring-[#6366f1] border-slate-300 rounded"
                     />
-                    <span className="ml-2 text-xs sm:text-sm md:text-base text-slate-700">
+                    <span className="ml-2 text-xs sm:text-sm text-slate-700">
                         아이디 저장
                     </span>
                 </label>
                 <Link
                     href="/find-account"
-                    className="text-xs sm:text-sm md:text-base text-gray-600 hover:text-[#6366f1] transition-colors"
+                    className="text-xs sm:text-sm text-gray-600 hover:text-[#6366f1] transition-colors"
                 >
                     아이디 · 비밀번호 찾기
                 </Link>
@@ -203,10 +203,10 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
             <motion.button
                 onClick={handleLogin}
                 className="bg-[#6366f1] hover:bg-[#8b5cf6] text-white
-                         py-3 sm:py-4 md:py-5 rounded-lg
-                         mb-4 sm:mb-5 md:mb-6
+                         py-3 sm:py-4 rounded-lg
+                         mb-4 sm:mb-5
                          transition-all font-semibold disabled:opacity-50
-                         text-sm sm:text-base md:text-lg"
+                         text-sm sm:text-base"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={isLoading}
@@ -215,7 +215,7 @@ export default function LoginForm({ onFlip }: LoginFormProps) {
             </motion.button>
 
             {/* 회원가입 이동 */}
-            <div className="text-center text-xs sm:text-sm md:text-base">
+            <div className="text-center text-xs sm:text-sm">
                 <span className="text-slate-600">아직 회원이 아니신가요? </span>
                 <span
                     className="text-[#6366f1] cursor-pointer hover:underline font-semibold"
