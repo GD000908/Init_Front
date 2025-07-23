@@ -30,7 +30,6 @@ export default function FindUserId() {
 
             const response = await fetch(`https://initback-production-67bf.up.railway.app/api/find-userid`, {
 
-
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
@@ -86,9 +85,9 @@ export default function FindUserId() {
     return (
         <div className="space-y-6">
             <div className="text-center">
-                <Mail className="w-12 h-12 text-[#356ae4] mx-auto mb-4" />
+                <Mail className="w-12 h-12 text-indigo-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">아이디 찾기</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 px-4">
                     가입할 때 사용한 이메일 주소를 입력해주세요
                 </p>
             </div>
@@ -97,7 +96,7 @@ export default function FindUserId() {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="space-y-4"
+                    className="space-y-4 px-2 sm:px-0"
                 >
                     {/* 이메일 입력 */}
                     <div>
@@ -109,7 +108,7 @@ export default function FindUserId() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="example@email.com"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4] focus:border-[#356ae4]"
+                            className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
                             onKeyPress={(e) => e.key === "Enter" && handleFindUserId()}
                         />
                     </div>
@@ -118,7 +117,7 @@ export default function FindUserId() {
                     <motion.button
                         onClick={handleFindUserId}
                         disabled={isLoading || !email}
-                        className="w-full bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -133,7 +132,7 @@ export default function FindUserId() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center space-y-4"
+                    className="text-center space-y-4 px-2 sm:px-0"
                 >
                     <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
                     <div>
@@ -142,7 +141,7 @@ export default function FindUserId() {
                         </h4>
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                             <p className="text-sm text-gray-600 mb-2">회원님의 아이디는</p>
-                            <p className="text-2xl font-bold text-[#356ae4]">
+                            <p className="text-xl sm:text-2xl font-bold text-indigo-500 break-all">
                                 {result.userId}
                             </p>
                         </div>
@@ -150,13 +149,13 @@ export default function FindUserId() {
                     <div className="space-y-2">
                         <button
                             onClick={() => window.location.href = "/login"}
-                            className="w-full bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold"
+                            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                         >
                             로그인하러 가기
                         </button>
                         <button
                             onClick={resetForm}
-                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold"
+                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                         >
                             다시 찾기
                         </button>
@@ -169,7 +168,7 @@ export default function FindUserId() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center space-y-4"
+                    className="text-center space-y-4 px-2 sm:px-0"
                 >
                     <AlertCircle className="w-16 h-16 text-red-500 mx-auto" />
                     <div>
@@ -185,13 +184,13 @@ export default function FindUserId() {
                     <div className="space-y-2">
                         <button
                             onClick={resetForm}
-                            className="w-full bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold"
+                            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                         >
                             다시 시도하기
                         </button>
                         <button
                             onClick={() => window.location.href = "/login?signup=true"}
-                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold"
+                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                         >
                             회원가입하러 가기
                         </button>

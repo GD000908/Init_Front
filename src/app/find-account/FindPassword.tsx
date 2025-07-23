@@ -140,15 +140,15 @@ export default function FindPassword() {
         <div className="space-y-6">
             {/* 헤더 */}
             <div className="text-center">
-                <Lock className="w-12 h-12 text-[#356ae4] mx-auto mb-4" />
+                <Lock className="w-12 h-12 text-indigo-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">비밀번호 찾기</h3>
                 <div className="flex justify-center space-x-2 mb-4">
                     {["input", "verify", "reset", "complete"].map((stepName, index) => (
                         <div
                             key={stepName}
-                            className={`w-3 h-3 rounded-full ${
+                            className={`w-3 h-3 rounded-full transition-colors ${
                                 ["input", "verify", "reset", "complete"].indexOf(step) >= index
-                                    ? "bg-[#356ae4]"
+                                    ? "bg-indigo-500"
                                     : "bg-gray-300"
                             }`}
                         />
@@ -161,9 +161,9 @@ export default function FindPassword() {
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-50 border border-red-200 rounded-lg p-3"
+                    className="bg-red-50 border border-red-200 rounded-lg p-3 mx-2 sm:mx-0"
                 >
-                    <p className="text-sm text-red-600 text-center">{error}</p>
+                    <p className="text-sm text-red-600 text-center break-words">{error}</p>
                 </motion.div>
             )}
 
@@ -172,9 +172,9 @@ export default function FindPassword() {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="space-y-4"
+                    className="space-y-4 px-2 sm:px-0"
                 >
-                    <p className="text-sm text-gray-600 text-center">
+                    <p className="text-sm text-gray-600 text-center px-4">
                         아이디와 가입한 이메일을 입력해주세요
                     </p>
 
@@ -187,7 +187,7 @@ export default function FindPassword() {
                             value={formData.userId}
                             onChange={(e) => setFormData({...formData, userId: e.target.value})}
                             placeholder="아이디를 입력하세요"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4]"
+                            className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
                         />
                     </div>
 
@@ -200,14 +200,14 @@ export default function FindPassword() {
                             value={formData.email}
                             onChange={(e) => setFormData({...formData, email: e.target.value})}
                             placeholder="example@email.com"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4]"
+                            className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
                         />
                     </div>
 
                     <motion.button
                         onClick={handleSendCode}
                         disabled={isLoading}
-                        className="w-full bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -222,12 +222,12 @@ export default function FindPassword() {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="space-y-4"
+                    className="space-y-4 px-2 sm:px-0"
                 >
                     <div className="text-center">
                         <Shield className="w-12 h-12 text-green-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">
-                            <span className="font-semibold text-[#356ae4]">{formData.email}</span>로<br/>
+                        <p className="text-sm text-gray-600 px-4">
+                            <span className="font-semibold text-indigo-500 break-all">{formData.email}</span>로<br/>
                             인증 코드가 발송되었습니다
                         </p>
                     </div>
@@ -241,22 +241,22 @@ export default function FindPassword() {
                             value={formData.verificationCode}
                             onChange={(e) => setFormData({...formData, verificationCode: e.target.value.replace(/\D/g, '').slice(0, 6)})}
                             placeholder="000000"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4] text-center text-2xl font-mono tracking-wider"
+                            className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center text-xl sm:text-2xl font-mono tracking-wider"
                             maxLength={6}
                         />
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <button
                             onClick={() => setStep("input")}
-                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold"
+                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                         >
                             이전
                         </button>
                         <motion.button
                             onClick={handleVerifyCode}
                             disabled={isLoading || formData.verificationCode.length !== 6}
-                            className="flex-1 bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
@@ -267,7 +267,7 @@ export default function FindPassword() {
 
                     <button
                         onClick={handleSendCode}
-                        className="w-full text-sm text-gray-500 hover:text-[#356ae4] py-2"
+                        className="w-full text-sm text-gray-500 hover:text-indigo-500 py-2 transition-colors"
                     >
                         인증 코드를 받지 못하셨나요? 다시 발송
                     </button>
@@ -279,11 +279,11 @@ export default function FindPassword() {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="space-y-4"
+                    className="space-y-4 px-2 sm:px-0"
                 >
                     <div className="text-center">
                         <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 px-4">
                             인증이 완료되었습니다<br/>
                             새로운 비밀번호를 설정해주세요
                         </p>
@@ -299,7 +299,7 @@ export default function FindPassword() {
                                 value={formData.newPassword}
                                 onChange={(e) => setFormData({...formData, newPassword: e.target.value})}
                                 placeholder="8자 이상, 영문+숫자+특수문자"
-                                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4]"
+                                className="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
                             />
                             <button
                                 type="button"
@@ -333,7 +333,7 @@ export default function FindPassword() {
                                 value={formData.confirmPassword}
                                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                                 placeholder="비밀번호를 다시 입력하세요"
-                                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#356ae4]"
+                                className="w-full px-3 sm:px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
                             />
                             <button
                                 type="button"
@@ -363,7 +363,7 @@ export default function FindPassword() {
                     <motion.button
                         onClick={handleResetPassword}
                         disabled={isLoading || !isPasswordValid || !isPasswordMatch}
-                        className="w-full bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -378,7 +378,7 @@ export default function FindPassword() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center space-y-4"
+                    className="text-center space-y-4 px-2 sm:px-0"
                 >
                     <CheckCircle className="w-20 h-20 text-green-500 mx-auto" />
                     <div>
@@ -391,7 +391,7 @@ export default function FindPassword() {
                     </div>
 
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <p className="text-sm text-green-700">
+                        <p className="text-sm text-green-700 break-all">
                             🔐 <span className="font-semibold">{formData.userId}</span> 계정의<br/>
                             비밀번호가 성공적으로 변경되었습니다
                         </p>
@@ -400,13 +400,13 @@ export default function FindPassword() {
                     <div className="space-y-2">
                         <button
                             onClick={() => window.location.href = "/login"}
-                            className="w-full bg-[#356ae4] hover:bg-[#2857c8] text-white py-3 rounded-lg font-semibold"
+                            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                         >
                             로그인하러 가기
                         </button>
                         <button
                             onClick={resetForm}
-                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold"
+                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                         >
                             다른 계정 찾기
                         </button>
