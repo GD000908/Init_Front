@@ -782,7 +782,8 @@ export default function JobCalendarView() {
             {/* 북마크 목록 모달 */}
             <Dialog open={showBookmarkModal} onOpenChange={setShowBookmarkModal}>
                 <DialogContent
-                    className="mx-2 w-[calc(100vw-1rem)] sm:mx-4 sm:w-[calc(100vw-2rem)] md:mx-auto md:w-full md:max-w-[500px] lg:max-w-[600px] max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                    className="mx-2 w-[calc(100vw-1rem)] sm:mx-4 sm:w-[calc(100vw-2rem)] md:mx-auto md:w-full md:max-w-[400px] lg:max-w-[500px] max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl"
+                    style={{ maxWidth: '400px' }}>
                     <DialogHeader>
                         <DialogTitle
                             className="flex items-center text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -925,7 +926,8 @@ export default function JobCalendarView() {
             {/* 편집 모달 */}
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
                 <DialogContent
-                    className="mx-2 w-[calc(100vw-1rem)] sm:mx-4 sm:w-[calc(100vw-2rem)] md:mx-auto md:w-full md:max-w-[500px] lg:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                    className="mx-2 w-[calc(100vw-1rem)] sm:mx-4 sm:w-[calc(100vw-2rem)] md:mx-auto md:w-full md:max-w-[400px] lg:max-w-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl"
+                    style={{ maxWidth: '400px' }}>
                     {editingCompany && (
                         <>
                             <DialogHeader>

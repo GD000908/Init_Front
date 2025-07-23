@@ -1434,20 +1434,13 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
             className="fixed inset-0 lg:left-[280px] bg-black/60 backdrop-blur-sm z-[100]"
             onClick={onClose}
         >
-            <div className="flex items-center justify-center min-h-screen p-4">
+            <div className="flex items-center justify-center min-h-screen p-2 sm:p-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl"
-                    style={{
-                        // 🔥 적절한 크기로 조정
-                        width: '90%', // 메인 영역의 90%
-                        maxWidth: '900px', // 최대 너비 제한
-                        minWidth: '600px', // 최소 너비 보장
-                        maxHeight: '85vh' // 높이 제한
-                    }}
+                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-[800px] lg:max-w-[900px] max-h-[90vh] sm:max-h-[85vh]"
                     onClick={handleContentClick}
                 >
                     {/* 헤더 */}
@@ -1498,9 +1491,9 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                         animate={{ opacity: 1, y: 0 }}
                                         className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600"
                                     >
-                                        <div className="grid grid-cols-10 gap-3 items-end">
+                                        <div className="grid grid-cols-1 sm:grid-cols-10 gap-2 sm:gap-3 items-end">
                                             {/* 회사명 */}
-                                            <div className="col-span-3">
+                                            <div className="sm:col-span-3">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                     회사명
                                                 </label>
@@ -1513,7 +1506,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                             </div>
 
                                             {/* 직무 */}
-                                            <div className="col-span-3">
+                                            <div className="sm:col-span-3">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                     직무
                                                 </label>
@@ -1528,7 +1521,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
 
 
                                             {/* 상태 */}
-                                            <div className="col-span-3">
+                                            <div className="sm:col-span-3">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                     상태
                                                 </label>
@@ -1545,7 +1538,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                             </div>
 
                                             {/* 삭제 버튼 */}
-                                            <div className="col-span-1 flex justify-center">
+                                            <div className="sm:col-span-1 flex justify-center">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
