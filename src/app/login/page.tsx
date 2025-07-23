@@ -40,7 +40,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 relative overflow-hidden px-4 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 relative overflow-auto px-4 py-4 sm:py-8">
             {/* 배경 장식 요소들 - 반응형 크기 조정 */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* 모바일: 작은 크기, 데스크톱: 큰 크기 */}
@@ -58,41 +58,44 @@ export default function LoginPage() {
                 <div className="absolute top-2/3 left-1/4 w-1.5 h-1.5 bg-pink-400 rounded-full opacity-25"></div>
             </div>
 
-            {/* 반응형 컨테이너 - 로그인/회원가입 모두 동일한 크기 */}
-            <div className="relative w-full max-w-md mx-auto z-10" style={{ perspective: '1000px' }}>
-                <div
-                    className="relative w-full transition-transform duration-700"
-                    style={{
-                        transformStyle: "preserve-3d",
-                        transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
-                    }}
-                >
-                    {/* 앞면: 로그인 */}
+            {/* 컨테이너를 flex로 중앙 정렬하되 스크롤 가능하게 */}
+            <div className="flex items-center justify-center min-h-screen sm:items-start sm:pt-16">
+                {/* 반응형 컨테이너 - 로그인/회원가입 모두 동일한 크기 */}
+                <div className="relative w-full max-w-md mx-auto z-10" style={{ perspective: '1000px' }}>
                     <div
-                        className="w-full"
-                        style={{backfaceVisibility: "hidden"}}
-                    >
-                        <LoginForm onFlip={() => setIsFlipped(true)}/>
-                    </div>
-
-                    {/* 뒷면: 회원가입 */}
-                    <div
-                        className="absolute top-0 left-0 w-full"
+                        className="relative w-full transition-transform duration-700"
                         style={{
-                            backfaceVisibility: "hidden",
-                            transform: "rotateY(180deg)",
+                            transformStyle: "preserve-3d",
+                            transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
                         }}
                     >
-                        <SignupForm
-                            onFlip={() => setIsFlipped(false)}
-                            formData={formData}
-                            onChange={handleInputChange}
-                            onInterestChange={handleInterestChange}
-                            showPassword={showPassword}
-                            showConfirmPassword={showConfirmPassword}
-                            setShowPassword={setShowPassword}
-                            setShowConfirmPassword={setShowConfirmPassword}
-                        />
+                        {/* 앞면: 로그인 */}
+                        <div
+                            className="w-full"
+                            style={{backfaceVisibility: "hidden"}}
+                        >
+                            <LoginForm onFlip={() => setIsFlipped(true)}/>
+                        </div>
+
+                        {/* 뒷면: 회원가입 */}
+                        <div
+                            className="absolute top-0 left-0 w-full"
+                            style={{
+                                backfaceVisibility: "hidden",
+                                transform: "rotateY(180deg)",
+                            }}
+                        >
+                            <SignupForm
+                                onFlip={() => setIsFlipped(false)}
+                                formData={formData}
+                                onChange={handleInputChange}
+                                onInterestChange={handleInterestChange}
+                                showPassword={showPassword}
+                                showConfirmPassword={showConfirmPassword}
+                                setShowPassword={setShowPassword}
+                                setShowConfirmPassword={setShowConfirmPassword}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

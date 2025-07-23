@@ -245,7 +245,7 @@ export default function SignupForm({
         <div className="w-full max-w-md mx-auto bg-white/90 backdrop-blur-sm
                        rounded-2xl shadow-2xl
                        p-4 sm:p-5 md:p-6
-                       max-h-[75vh] sm:max-h-[80vh]
+                       max-h-[85vh] sm:max-h-[80vh]
                        flex flex-col overflow-hidden"
              style={{backfaceVisibility: "hidden"}}>
 
