@@ -1,3 +1,55 @@
+/* ================================================================
+   모바일 메뉴 버튼
+   ================================================================ */
+.mobileMenuButton {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  width: 50px;
+  height: 50px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  color: #6b7280;
+}
+
+.mobileMenuButton.dark {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+.mobileMenuButton:hover {
+  background: #f9fafb;
+  transform: scale(1.05);
+}
+
+.mobileMenuButton.dark:hover {
+  background: #374151;
+}
+
+/* 모바일 오버레이 */
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* ================================================================
+   사이드바 기본 스타일
+   ================================================================ */
 .sidebar {
   position: fixed;
   left: 0;
@@ -10,6 +62,8 @@
   flex-direction: column;
   z-index: 1000;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  overflow-y: auto; /* 스크롤 가능하도록 */
 }
 
 .sidebar.dark {
@@ -17,7 +71,9 @@
   border-right-color: #374151;
 }
 
-/* Header */
+/* ================================================================
+   Header
+   ================================================================ */
 .header {
   padding: 20px;
   border-bottom: 1px solid #e5e7eb;
@@ -25,6 +81,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: 80px;
+  flex-shrink: 0; /* 스크롤 시 고정 */
 }
 
 .sidebar.dark .header {
@@ -53,7 +110,7 @@
   gap: 8px;
 }
 
-.themeToggle {
+.themeToggle, .mobileCloseButton {
   width: 36px;
   height: 36px;
   border: none;
@@ -67,15 +124,15 @@
   padding: 0;
 }
 
-.themeToggle:hover {
+.themeToggle:hover, .mobileCloseButton:hover {
   background: #e5e7eb;
 }
 
-.sidebar.dark .themeToggle {
+.sidebar.dark .themeToggle, .sidebar.dark .mobileCloseButton {
   background: #374151;
 }
 
-.sidebar.dark .themeToggle:hover {
+.sidebar.dark .themeToggle:hover, .sidebar.dark .mobileCloseButton:hover {
   background: #4b5563;
 }
 
@@ -90,13 +147,16 @@
   color: #d1d5db;
 }
 
-/* Navigation */
+/* ================================================================
+   Navigation
+   ================================================================ */
 .nav {
   flex: 1;
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  overflow-y: auto; /* 내비게이션 영역 스크롤 */
+  min-height: 0; /* 플렉스 스크롤을 위해 필요 */
 }
 
 .menuList {
@@ -173,11 +233,13 @@
   font-weight: 500;
 }
 
-/* User Profile */
+/* ================================================================
+   User Profile
+   ================================================================ */
 .userProfile {
   padding: 20px;
   border-top: 1px solid #e5e7eb;
-  margin-top: auto;
+  flex-shrink: 0; /* 스크롤 시 고정 */
 }
 
 .sidebar.dark .userProfile {
@@ -266,23 +328,39 @@
   color: #9ca3af;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
+/* ================================================================
+   Logout Section
+   ================================================================ */
+.logoutSection {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0; /* 스크롤 시 고정 */
 }
 
-/* 추가적인 스타일링 */
-.sidebar {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+.sidebar.dark .logoutSection {
+  border-top-color: #374151;
 }
 
-/* 스크롤바 스타일링 */
+.logoutButton {
+  width: 100%;
+  padding: 10px 14px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #dc2626;
+}
+
+/* ================================================================
+   스크롤바 스타일링
+   ================================================================ */
 .sidebar::-webkit-scrollbar {
   width: 6px;
 }
@@ -308,29 +386,107 @@
   background: #6b7280;
 }
 
-.logoutSection {
-  padding: 16px 20px;
-  border-top: 1px solid #e5e7eb;
+/* ================================================================
+   반응형 디자인 - 모바일
+   ================================================================ */
+@media (max-width: 768px) {
+  /* 모바일 메뉴 버튼 표시 */
+  .mobileMenuButton {
+    display: flex;
+  }
+
+  /* 기본적으로 사이드바 숨김 */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  /* 모바일에서 메뉴가 열렸을 때 */
+  .sidebar.mobileOpen {
+    transform: translateX(0);
+  }
+
+  /* 모바일에서 명시적으로 숨김 */
+  .sidebar.mobileHidden {
+    transform: translateX(-100%);
+  }
+
+  /* 모바일에서 사이드바 크기 조정 */
+  .sidebar {
+    width: 320px; /* 모바일에서는 좀 더 넓게 */
+    max-width: 85vw; /* 화면의 85%를 넘지 않도록 */
+  }
+
+  /* 헤더 패딩 조정 */
+  .header {
+    padding: 16px 20px;
+    min-height: 70px;
+  }
+
+  /* 로고 텍스트 크기 조정 */
+  .logoText {
+    font-size: 20px;
+  }
+
+  /* 메뉴 패딩 조정 */
+  .nav {
+    padding: 16px 12px;
+  }
+
+  .menuLink {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  .menuIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* 사용자 프로필 영역 조정 */
+  .userProfile {
+    padding: 16px;
+  }
+
+  .userName {
+    font-size: 14px;
+  }
+
+  .userEmail {
+    font-size: 12px;
+  }
+
+  /* 로그아웃 버튼 조정 */
+  .logoutSection {
+    padding: 12px 16px;
+  }
+
+  .logoutButton {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
 }
 
-.sidebar.dark .logoutSection {
-  border-top-color: #374151;
+/* ================================================================
+   추가 스타일링
+   ================================================================ */
+.sidebar {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.logoutButton {
-  width: 100%;
-  padding: 10px 14px;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+/* 태블릿 사이즈 (768px ~ 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .sidebar {
+    width: 260px; /* 태블릿에서는 조금 더 좁게 */
+  }
 }
 
-.logoutButton:hover {
-  background-color: #dc2626;
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .mobileMenuButton,
+  .menuLink,
+  .themeToggle,
+  .mobileCloseButton {
+    transition: none;
+  }
 }
-

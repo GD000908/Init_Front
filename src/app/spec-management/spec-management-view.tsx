@@ -347,7 +347,7 @@ const ProfileEditPanel = ({ isOpen, onClose, profileData, initialSkills, onSave 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80"><motion.div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto" initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80 ml-0 md:ml-64"><motion.div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto" initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}>
             <div className="flex items-center justify-between mb-6"><h2 className="text-xl font-semibold dark:text-gray-100">프로필 수정</h2><Button onClick={onClose}><X className="w-5 h-5" /></Button></div>
             <div className="space-y-6">
                 <div><label className="text-sm font-medium block mb-2 text-gray-700 dark:text-gray-300">이름</label><Input value={editedProfile.name} onChange={(e) => handleChange('name', e.target.value)} /></div>
@@ -501,7 +501,7 @@ const TemplateSelector = ({ isOpen, onClose, currentTemplate, onSelectTemplate }
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 translate-x-[140px]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 md:translate-x-[140px]">
 
             <motion.div
                 className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 max-w-4xl w-full"
@@ -793,8 +793,8 @@ export default function SpecManagementView() {
     // 인증 로딩 중
     if (authLoading) {
         return (
-            <main className="ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8">
-                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8">
+            <main className="ml-64 md:ml-0 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300">
+                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8 w-full">
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
@@ -809,8 +809,8 @@ export default function SpecManagementView() {
     // 인증되지 않음
     if (!isAuthenticated || !userId) {
         return (
-            <main className="ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8">
-                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8">
+            <main className="ml-0 md:ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300">
+                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8 w-full">
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
                             <p className="text-red-600 dark:text-red-400 mb-4">로그인이 필요합니다.</p>
@@ -824,8 +824,8 @@ export default function SpecManagementView() {
     // 로딩 상태 처리
     if (isLoading) {
         return (
-            <main className="ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8">
-                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8">
+            <main className="ml-0 md:ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300">
+                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8 w-full">
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
@@ -840,8 +840,8 @@ export default function SpecManagementView() {
     // 에러 상태 처리
     if (error) {
         return (
-            <main className="ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8">
-                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8">
+            <main className="ml-0 md:ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300">
+                <div className="max-w-none lg:max-w-7xl mx-auto space-y-8 w-full">
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
                             <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
@@ -911,8 +911,8 @@ export default function SpecManagementView() {
     const allDataForPdf = { profile, skills, workExperiences, educations, certificates, links, projects, activities };
 
     return (
-        <main className="ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8">
-            <div className="max-w-none lg:max-w-7xl mx-auto space-y-8">
+        <main className="ml-0 md:ml-64 bg-gray-50 dark:bg-gray-950 min-h-screen p-4 sm:p-6 lg:p-8 transition-all duration-300">
+            <div className="max-w-none lg:max-w-7xl mx-auto space-y-8 w-full">
                 <div className="flex items-center justify-between">
                     <h1 className="flex items-center text-3xl font-bold text-gray-800 dark:text-gray-100">
                         <span role="img" aria-label="document" className="mr-3">📋</span>

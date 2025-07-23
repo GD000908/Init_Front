@@ -10,7 +10,7 @@ import {
     AlertCircle, Star, Edit2, Loader2,
     PieChart as PieChartIcon, TrendingUp, Briefcase, ArrowRight,
     Award, Camera, Link, Languages, GraduationCap, Trash2,
-    Building, ExternalLink, RefreshCw, Shield , Calendar
+    Building, ExternalLink, RefreshCw, Shield
 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
@@ -18,7 +18,7 @@ import EnhancedJobRecommendations from '@/components/EnhancedJobRecommendations'
 
 
 // API 기본 URL
-//const API_BASE_URL = 'http://localhost:8080/api/home';
+
 const API_BASE_URL = "https://initback-production-67bf.up.railway.app/api/home";
 
 
@@ -1361,8 +1361,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
             company: "",
             category: "",
             status: '지원 완료',
-            userId: userId,
-            deadline: tomorrow.toISOString().split('T')[0]
+            userId: userId
         };
         setApps([newApp, ...apps]);
     }
@@ -1432,12 +1431,8 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
 
     return (
         <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 lg:left-[280px] bg-black/60 backdrop-blur-sm z-[100]"
             onClick={onClose}
-            style={{
-                // 🔥 사이드바 영역을 제외한 오버레이
-                left: '280px', // 사이드바 너비만큼 왼쪽 여백
-            }}
         >
             <div className="flex items-center justify-center min-h-screen p-4">
                 <motion.div
@@ -1503,7 +1498,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                         animate={{ opacity: 1, y: 0 }}
                                         className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600"
                                     >
-                                        <div className="grid grid-cols-12 gap-3 items-end">
+                                        <div className="grid grid-cols-10 gap-3 items-end">
                                             {/* 회사명 */}
                                             <div className="col-span-3">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1530,21 +1525,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                                 />
                                             </div>
 
-                                            {/* 마감일 */}
-                                            <div className="col-span-2">
-                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                    날짜
-                                                </label>
-                                                <div className="relative">
-                                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                    <Input
-                                                        type="date"
-                                                        value={app.deadline}
-                                                        onChange={e => handleUpdate(app.id, 'deadline', e.target.value)}
-                                                        className="pl-10 rounded-lg border-gray-300 dark:border-gray-600"
-                                                    />
-                                                </div>
-                                            </div>
+
 
                                             {/* 상태 */}
                                             <div className="col-span-3">
@@ -1819,8 +1800,8 @@ export default function CareerLogHomePage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-black dark:via-gray-950 dark:to-black text-gray-800 dark:text-gray-200">
-            <main style={{ marginLeft: '280px' }} className="p-8">
-                <div className="max-w-7xl mx-auto space-y-6">
+            <main className="ml-0 lg:ml-[280px] p-4 lg:p-8 transition-all duration-300">
+                <div className="w-full space-y-6">
                     <Header userName={userName} />
 
                     {profileData && (

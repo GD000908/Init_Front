@@ -26,6 +26,18 @@ export default function AuthenticatedLayout({ children, pathname }: Authenticate
     const [userRole, setUserRole] = useState<string | null>(null)
     const [isCheckingAuth, setIsCheckingAuth] = useState(true)
     const [shouldRedirect, setShouldRedirect] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+
+    // 🔥 화면 크기 체크
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // 🔥 일반 사용자(USER) 전용 경로
     const userPaths = [

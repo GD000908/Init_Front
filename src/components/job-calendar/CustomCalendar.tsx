@@ -67,19 +67,19 @@ export function CustomCalendar({ selected, onSelect, disabled, className }: Cust
     }
 
     return (
-        <div className={`p-4 w-80 ${className}`}>  {/* w-80 추가 (320px) */}
+        <div className={`p-2 sm:p-4 w-72 sm:w-80 ${className}`}>
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-4">
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={goToPrevMonth}
-                    className="h-7 w-7 p-0"
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
                 >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
 
-                <h2 className="text-sm font-medium">
+                <h2 className="text-xs sm:text-sm font-medium">
                     {year}년 {month + 1}월
                 </h2>
 
@@ -87,18 +87,18 @@ export function CustomCalendar({ selected, onSelect, disabled, className }: Cust
                     variant="outline"
                     size="sm"
                     onClick={goToNextMonth}
-                    className="h-7 w-7 p-0"
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
                 >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
             </div>
 
             {/* 요일 헤더 */}
-            <div className="grid grid-cols-7 gap-1 mb-2">  {/* gap-1 추가 */}
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
                 {weekdays.map((day, index) => (
                     <div
                         key={day}
-                        className={`h-10 w-12 flex items-center justify-center text-sm font-medium ${  /* h-10 w-12로 크기 증가 */
+                        className={`h-8 w-10 sm:h-10 sm:w-12 flex items-center justify-center text-xs sm:text-sm font-medium ${
                             index === 0 ? 'text-red-500' : index === 6 ? 'text-blue-500' : 'text-gray-500'
                         }`}
                     >
@@ -108,7 +108,7 @@ export function CustomCalendar({ selected, onSelect, disabled, className }: Cust
             </div>
 
             {/* 날짜 그리드 */}
-            <div className="grid grid-cols-7 gap-1">  {/* gap-1 추가 */}
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                 {dates.map((date, index) => {
                     const isDisabled = disabled && disabled(date)
                     const currentMonthDate = isCurrentMonth(date)
@@ -119,25 +119,25 @@ export function CustomCalendar({ selected, onSelect, disabled, className }: Cust
                             onClick={() => handleDateClick(date)}
                             disabled={isDisabled}
                             className={`
-                h-10 w-12 flex items-center justify-center text-sm transition-colors  /* h-10 w-12로 크기 증가 */
-                ${currentMonthDate
+               h-8 w-10 sm:h-10 sm:w-12 flex items-center justify-center text-xs sm:text-sm transition-colors
+               ${currentMonthDate
                                 ? 'text-gray-900 dark:text-gray-100'
                                 : 'text-gray-400 dark:text-gray-600'
                             }
-                ${isSelected(date)
+               ${isSelected(date)
                                 ? 'bg-primary text-primary-foreground font-medium'
                                 : 'hover:bg-accent hover:text-accent-foreground'
                             }
-                ${isToday(date) && !isSelected(date)
+               ${isToday(date) && !isSelected(date)
                                 ? 'bg-accent text-accent-foreground font-medium'
                                 : ''
                             }
-                ${isDisabled
+               ${isDisabled
                                 ? 'opacity-50 cursor-not-allowed'
                                 : 'cursor-pointer'
                             }
-                rounded-sm
-              `}
+               rounded-sm
+             `}
                         >
                             {date.getDate()}
                         </button>

@@ -403,12 +403,13 @@ export default function ResumeEditor({ resumeId }: ResumeEditorProps) {
   ]
 
   return (
+
       <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="max-w-6xl mx-auto"
+          className="max-w-6xl mx-auto px-4 sm:px-0"
       >
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="sm" className="mr-2" onClick={handleGoBack}>

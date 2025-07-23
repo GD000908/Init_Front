@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowDownUp,
   ArrowUpDown,
-  Download,
   Edit,
   Copy,
   Trash2,
@@ -18,10 +17,8 @@ import {
   Building,
   MapPin,
   Plus,
-  RefreshCw,
   FileText,
   Rocket,
-  Zap,
 } from "lucide-react"
 import { resumeApiClient } from "@/lib/api-resume"
 
@@ -202,7 +199,7 @@ export default function ResumeList() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="max-w-6xl mx-auto"
+          className="max-w-6xl mx-auto px-4 sm:px-0"
       >
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center">

@@ -1,23 +1,23 @@
 "use client"
-import { useState, useEffect } from "react"
+import {useState, useEffect} from "react"
 import type React from "react"
 
-import { motion } from "framer-motion"
-import { useInView } from "react-intersection-observer"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Calendar, Plus, X, Bookmark, Loader2 } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CustomCalendar } from "./CustomCalendar"
-import { format } from "date-fns"
-import { ko } from "date-fns/locale"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
+import {motion} from "framer-motion"
+import {useInView} from "react-intersection-observer"
+import {Card} from "@/components/ui/card"
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {Calendar, Plus, X, Bookmark, Loader2} from "lucide-react"
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
+import {CustomCalendar} from "./CustomCalendar"
+import {format} from "date-fns"
+import {ko} from "date-fns/locale"
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog"
+import {Badge} from "@/components/ui/badge"
 import BookmarkList from "./bookmark-list"
 import SimpleCalendar from "./SimpleCalendar"
-import { useAuth } from "@/hooks/useAuth"
-import { useRouter } from 'next/navigation'
+import {useAuth} from "@/hooks/useAuth"
+import {useRouter} from 'next/navigation'
 
 // API 타입 정의
 interface JobPostingDto {
@@ -189,7 +189,11 @@ class JobPostingApi {
 const jobPostingApi = new JobPostingApi();
 
 // 간단한 토스트 함수
-const toast = ({ title, description, variant }: { title: string; description: string; variant?: 'default' | 'destructive' }) => {
+const toast = ({title, description, variant}: {
+    title: string;
+    description: string;
+    variant?: 'default' | 'destructive'
+}) => {
     const message = `${title}: ${description}`;
     if (variant === 'destructive') {
         alert(`❌ ${message}`);
@@ -221,13 +225,13 @@ interface NewCompanyForm {
 }
 
 export default function JobCalendarView() {
-    const { ref, inView } = useInView({
+    const {ref, inView} = useInView({
         triggerOnce: true,
         threshold: 0.1,
     })
 
     // 인증 관련
-    const { userId, userName, isLoading: authLoading, isAuthenticated } = useAuth()
+    const {userId, userName, isLoading: authLoading, isAuthenticated} = useAuth()
     const router = useRouter()
 
     // 상태 관리
@@ -545,7 +549,7 @@ export default function JobCalendarView() {
         return (
             <div className="w-full max-w-6xl mx-auto px-4 flex items-center justify-center min-h-[400px]">
                 <div className="flex items-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500"/>
                     <span className="text-gray-600 dark:text-gray-400">인증 정보 확인 중...</span>
                 </div>
             </div>
@@ -572,7 +576,7 @@ export default function JobCalendarView() {
         return (
             <div className="w-full max-w-6xl mx-auto px-4 flex items-center justify-center min-h-[400px]">
                 <div className="flex items-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500"/>
                     <span className="text-gray-600 dark:text-gray-400">북마크 로딩 중...</span>
                 </div>
             </div>
@@ -597,58 +601,64 @@ export default function JobCalendarView() {
     return (
         <motion.div
             ref={ref}
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-6xl mx-auto px-4"
+            initial={{opacity: 0, y: 20}}
+            animate={inView ? {opacity: 1, y: 0} : {}}
+            transition={{duration: 0.5}}
+            className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
         >
             {/* 헤더 */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
-                        📅 공고 캘린더
-                        {userName && <span className="text-sm text-gray-500 ml-2">({userName}님)</span>}
+                <div className="min-w-0 flex-1"> {/* 텍스트 영역 */}
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+                        <span>📅 공고 캘린더</span>
+                        {userName && (
+                            <span className="text-xs sm:text-sm text-gray-500 ml-1 sm:ml-2 whitespace-nowrap">
+            ({userName}님)
+        </span>
+                        )}
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">
+                    <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs sm:text-sm">
                         북마크한 채용공고의 마감일을 한눈에 확인하세요
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                    <div className="text-xs text-gray-600 dark:text-gray-400 text-center sm:text-left">
                         진행중 {activeCount}개 · 마감됨 {expiredCount}개
                     </div>
 
-                    {/* 북마크 목록 버튼 */}
-                    <Button
-                        variant="outline"
-                        onClick={() => setShowBookmarkModal(true)}
-                        className="text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl px-4 py-2 text-sm"
-                    >
-                        <Bookmark className="w-4 h-4 mr-2" />
-                        공고 목록
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        {/* 북마크 목록 버튼 */}
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowBookmarkModal(true)}
+                            className="text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl px-4 py-2 text-sm"
+                        >
+                            <Bookmark className="w-4 h-4 mr-2"/>
+                            공고 목록
+                        </Button>
 
-                    {/* 공고 추가 버튼 */}
-                    <Button
-                        onClick={() => setShowAddForm(!showAddForm)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2 text-sm"
-                    >
-                        {showAddForm ? <X className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
-                        {showAddForm ? "취소" : "공고 추가"}
-                    </Button>
+                        {/* 공고 추가 버튼 */}
+                        <Button
+                            onClick={() => setShowAddForm(!showAddForm)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2 text-sm"
+                        >
+                            {showAddForm ? <X className="w-4 h-4 mr-1"/> : <Plus className="w-4 h-4 mr-1"/>}
+                            {showAddForm ? "취소" : "공고 추가"}
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             {/* 공고 추가 폼 */}
             {showAddForm && (
                 <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{opacity: 0, height: 0}}
+                    animate={{opacity: 1, height: "auto"}}
+                    exit={{opacity: 0, height: 0}}
                     className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div className="md:col-span-2 lg:col-span-1">
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                                 회사명 *
@@ -656,7 +666,7 @@ export default function JobCalendarView() {
                             <Input
                                 placeholder="예: 네이버, 카카오"
                                 value={newCompany.title}
-                                onChange={(e) => setNewCompany({ ...newCompany, title: e.target.value })}
+                                onChange={(e) => setNewCompany({...newCompany, title: e.target.value})}
                                 className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                             />
                         </div>
@@ -671,14 +681,15 @@ export default function JobCalendarView() {
                                         variant="outline"
                                         className="w-full justify-start text-left font-normal dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                                     >
-                                        <Calendar className="mr-2 h-4 w-4" />
-                                        {newCompany.start ? format(newCompany.start, "yyyy년 MM월 dd일", { locale: ko }) : <span className="text-gray-500">시작일 선택</span>}
+                                        <Calendar className="mr-2 h-4 w-4"/>
+                                        {newCompany.start ? format(newCompany.start, "yyyy년 MM월 dd일", {locale: ko}) :
+                                            <span className="text-gray-500">시작일 선택</span>}
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0" align="start">
                                     <CustomCalendar
                                         selected={newCompany.start || undefined}
-                                        onSelect={(date) => setNewCompany({ ...newCompany, start: date || null })}
+                                        onSelect={(date) => setNewCompany({...newCompany, start: date || null})}
                                     />
                                 </PopoverContent>
                             </Popover>
@@ -694,14 +705,15 @@ export default function JobCalendarView() {
                                         variant="outline"
                                         className="w-full justify-start text-left font-normal dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                                     >
-                                        <Calendar className="mr-2 h-4 w-4" />
-                                        {newCompany.end ? format(newCompany.end, "yyyy년 MM월 dd일", { locale: ko }) : <span className="text-gray-500">마감일 선택</span>}
+                                        <Calendar className="mr-2 h-4 w-4"/>
+                                        {newCompany.end ? format(newCompany.end, "yyyy년 MM월 dd일", {locale: ko}) :
+                                            <span className="text-gray-500">마감일 선택</span>}
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0" align="start">
                                     <CustomCalendar
                                         selected={newCompany.end || undefined}
-                                        onSelect={(date) => setNewCompany({ ...newCompany, end: date || null })}
+                                        onSelect={(date) => setNewCompany({...newCompany, end: date || null})}
                                     />
                                 </PopoverContent>
                             </Popover>
@@ -714,7 +726,7 @@ export default function JobCalendarView() {
                             <Input
                                 placeholder="예: 프론트엔드 개발자"
                                 value={newCompany.position}
-                                onChange={(e) => setNewCompany({ ...newCompany, position: e.target.value })}
+                                onChange={(e) => setNewCompany({...newCompany, position: e.target.value})}
                                 className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                             />
                         </div>
@@ -726,7 +738,7 @@ export default function JobCalendarView() {
                             <Input
                                 placeholder="예: 서울 강남구"
                                 value={newCompany.location}
-                                onChange={(e) => setNewCompany({ ...newCompany, location: e.target.value })}
+                                onChange={(e) => setNewCompany({...newCompany, location: e.target.value})}
                                 className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                             />
                         </div>
@@ -738,7 +750,7 @@ export default function JobCalendarView() {
                             <Input
                                 placeholder="예: 3000~5000만원"
                                 value={newCompany.salary}
-                                onChange={(e) => setNewCompany({ ...newCompany, salary: e.target.value })}
+                                onChange={(e) => setNewCompany({...newCompany, salary: e.target.value})}
                                 className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                             />
                         </div>
@@ -769,10 +781,12 @@ export default function JobCalendarView() {
 
             {/* 북마크 목록 모달 */}
             <Dialog open={showBookmarkModal} onOpenChange={setShowBookmarkModal}>
-                <DialogContent className="sm:max-w-[600px] max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                <DialogContent
+                    className="mx-4 w-[calc(100vw-2rem)] sm:mx-auto sm:w-full sm:max-w-[600px] max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center text-xl font-semibold text-gray-800 dark:text-gray-100">
-                            <Bookmark className="w-5 h-5 mr-2 text-indigo-500" />
+                        <DialogTitle
+                            className="flex items-center text-xl font-semibold text-gray-800 dark:text-gray-100">
+                            <Bookmark className="w-5 h-5 mr-2 text-indigo-500"/>
                             저장한 공고 목록
                         </DialogTitle>
                     </DialogHeader>
@@ -781,8 +795,10 @@ export default function JobCalendarView() {
                         <BookmarkList
                             companies={bookmarkedCompanies}
                             onDelete={handleDeleteCompany}
-                            onCompanyMouseEnter={() => {}} // 빈 함수
-                            onCompanyMouseLeave={() => {}} // 빈 함수
+                            onCompanyMouseEnter={() => {
+                            }} // 빈 함수
+                            onCompanyMouseLeave={() => {
+                            }} // 빈 함수
                             onCompanyClick={handleCompanyClick}
                         />
                     </div>
@@ -801,14 +817,15 @@ export default function JobCalendarView() {
 
             {/* 이벤트 상세 정보 모달 */}
             <Dialog open={showEventDetails} onOpenChange={setShowEventDetails}>
-                <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                <DialogContent
+                    className="mx-4 w-[calc(100vw-2rem)] sm:mx-auto sm:w-full sm:max-w-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
                     {selectedEvent && (
                         <>
                             <DialogHeader>
                                 <DialogTitle className="flex items-center">
                                     <div
                                         className="w-4 h-4 rounded-full mr-3"
-                                        style={{ backgroundColor: selectedEvent.color || "#4f46e5" }}
+                                        style={{backgroundColor: selectedEvent.color || "#4f46e5"}}
                                     ></div>
                                     <span className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                                         {selectedEvent.title}
@@ -819,15 +836,17 @@ export default function JobCalendarView() {
                             <div className="space-y-6 py-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">지원 시작</p>
+                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">지원
+                                            시작</p>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {format(selectedEvent.start, "yyyy년 MM월 dd일", { locale: ko })}
+                                            {format(selectedEvent.start, "yyyy년 MM월 dd일", {locale: ko})}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">지원 마감</p>
+                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">지원
+                                            마감</p>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {format(selectedEvent.end, "yyyy년 MM월 dd일", { locale: ko })}
+                                            {format(selectedEvent.end, "yyyy년 MM월 dd일", {locale: ko})}
                                         </p>
                                     </div>
                                 </div>
@@ -905,7 +924,8 @@ export default function JobCalendarView() {
 
             {/* 편집 모달 */}
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+                <DialogContent
+                    className="mx-4 w-[calc(100vw-2rem)] sm:mx-auto sm:w-full sm:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
                     {editingCompany && (
                         <>
                             <DialogHeader>
@@ -930,7 +950,8 @@ export default function JobCalendarView() {
                                 {/* 날짜 */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                        <label
+                                            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                                             지원 시작일 *
                                         </label>
                                         <Popover>
@@ -939,21 +960,25 @@ export default function JobCalendarView() {
                                                     variant="outline"
                                                     className="w-full justify-start text-left font-normal dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                                                 >
-                                                    <Calendar className="mr-2 h-4 w-4" />
-                                                    {format(editingCompany.start, "yyyy년 MM월 dd일", { locale: ko })}
+                                                    <Calendar className="mr-2 h-4 w-4"/>
+                                                    {format(editingCompany.start, "yyyy년 MM월 dd일", {locale: ko})}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0" align="start">
                                                 <CustomCalendar
                                                     selected={editingCompany.start}
-                                                    onSelect={(date) => date && setEditingCompany({...editingCompany, start: date})}
+                                                    onSelect={(date) => date && setEditingCompany({
+                                                        ...editingCompany,
+                                                        start: date
+                                                    })}
                                                 />
                                             </PopoverContent>
                                         </Popover>
                                     </div>
 
                                     <div>
-                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                        <label
+                                            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                                             지원 마감일 *
                                         </label>
                                         <Popover>
@@ -962,14 +987,17 @@ export default function JobCalendarView() {
                                                     variant="outline"
                                                     className="w-full justify-start text-left font-normal dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                                                 >
-                                                    <Calendar className="mr-2 h-4 w-4" />
-                                                    {format(editingCompany.end, "yyyy년 MM월 dd일", { locale: ko })}
+                                                    <Calendar className="mr-2 h-4 w-4"/>
+                                                    {format(editingCompany.end, "yyyy년 MM월 dd일", {locale: ko})}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0" align="start">
                                                 <CustomCalendar
                                                     selected={editingCompany.end}
-                                                    onSelect={(date) => date && setEditingCompany({...editingCompany, end: date})}
+                                                    onSelect={(date) => date && setEditingCompany({
+                                                        ...editingCompany,
+                                                        end: date
+                                                    })}
                                                 />
                                             </PopoverContent>
                                         </Popover>
@@ -983,7 +1011,10 @@ export default function JobCalendarView() {
                                     </label>
                                     <Input
                                         value={editingCompany.position || ''}
-                                        onChange={(e) => setEditingCompany({...editingCompany, position: e.target.value})}
+                                        onChange={(e) => setEditingCompany({
+                                            ...editingCompany,
+                                            position: e.target.value
+                                        })}
                                         placeholder="예: 프론트엔드 개발자"
                                         className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                                     />
@@ -996,7 +1027,10 @@ export default function JobCalendarView() {
                                     </label>
                                     <Input
                                         value={editingCompany.location || ''}
-                                        onChange={(e) => setEditingCompany({...editingCompany, location: e.target.value})}
+                                        onChange={(e) => setEditingCompany({
+                                            ...editingCompany,
+                                            location: e.target.value
+                                        })}
                                         placeholder="예: 서울 강남구"
                                         className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 rounded-lg"
                                     />

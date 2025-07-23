@@ -147,7 +147,7 @@ export default function BookmarkList({
     }
 
     return (
-        <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[400px] sm:max-h-[500px] lg:max-h-[550px] overflow-y-auto pr-1">
             <AnimatePresence>
                 {companies.length === 0 ? (
                     <motion.div

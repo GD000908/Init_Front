@@ -12,9 +12,11 @@ import {
   Calendar,
   Users,
   Sun,
-  Moon
+  Moon,
+  Menu,
+  X
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth'; // 🔥 추가
+import { useAuth } from '@/hooks/useAuth';
 import styles from './GlobalSidebar.module.css';
 
 interface MenuItem {
@@ -34,8 +36,10 @@ export default function GlobalSidebar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
-  const { userId } = useAuth(); // 🔥 유저 ID 가져오기
+  const { userId } = useAuth();
 
   const menuItems: MenuItem[] = [
     { id: 'dashboard', label: '이력 관리 홈', icon: Home, href: '/dashboard' },
@@ -51,18 +55,51 @@ export default function GlobalSidebar() {
     { id: 'community', label: '커뮤니티', icon: Users, href: '/community' },
   ];
 
+  // 화면 크기 체크
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     setIsMounted(true);
     loadUserProfile();
     loadThemePreference();
   }, []);
 
-  // 🔥 페이지 이동 시에도 다크모드 상태 확인
   useEffect(() => {
     if (isMounted) {
       loadThemePreference();
     }
   }, [pathname, isMounted]);
+
+  // 모바일에서 메뉴 선택 시 자동으로 닫기
+  useEffect(() => {
+    if (isMobile && isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [pathname]);
+
+  // 모바일 메뉴 열려있을 때 body 스크롤 막기
+  useEffect(() => {
+    if (isMobile && isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobile, isMobileMenuOpen]);
 
   const getCookie = (name: string): string | null => {
     try {
@@ -97,13 +134,11 @@ export default function GlobalSidebar() {
 
   const loadThemePreference = () => {
     try {
-      // 🔥 localStorage와 documentElement 클래스 모두 확인
       const savedTheme = localStorage.getItem('theme');
       const hasCurrentDarkClass = document.documentElement.classList.contains('dark');
 
       console.log('🎨 Theme check:', { savedTheme, hasCurrentDarkClass, pathname });
 
-      // localStorage에 저장된 테마가 dark이거나, 현재 DOM에 dark 클래스가 있는 경우
       const shouldBeDark = savedTheme === 'dark' || hasCurrentDarkClass;
 
       if (shouldBeDark) {
@@ -124,7 +159,6 @@ export default function GlobalSidebar() {
 
     setIsDarkMode(newDarkMode);
 
-    // 🔥 DOM 클래스와 localStorage 모두 즉시 업데이트
     if (newDarkMode) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -133,7 +167,6 @@ export default function GlobalSidebar() {
       localStorage.setItem('theme', 'light');
     }
 
-    // 🔥 다른 탭/창에서도 동기화되도록 storage 이벤트 발생
     window.dispatchEvent(new StorageEvent('storage', {
       key: 'theme',
       newValue: newDarkMode ? 'dark' : 'light',
@@ -141,7 +174,6 @@ export default function GlobalSidebar() {
     }));
   };
 
-  // 🔥 다른 탭에서 테마 변경 시 동기화
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'theme' && e.newValue) {
@@ -177,93 +209,143 @@ export default function GlobalSidebar() {
     }
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   if (!isMounted) {
     return (
-        <aside className={styles.sidebar}>
-          <div className={styles.header}>
-            <div className={styles.logo}>
-              <span className={styles.logoText}>Init</span>
+        <>
+          {/* 모바일 메뉴 버튼 - 로딩 중에도 보이도록 */}
+          <button className={styles.mobileMenuButton} style={{ opacity: 0 }}>
+            <Menu />
+          </button>
+          <aside className={styles.sidebar}>
+            <div className={styles.header}>
+              <div className={styles.logo}>
+                <span className={styles.logoText}>Init</span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-pulse text-gray-400">Loading...</div>
-          </div>
-        </aside>
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-pulse text-gray-400">Loading...</div>
+            </div>
+          </aside>
+        </>
     );
   }
 
   if (!userProfile) {
     return (
-        <aside className={`${styles.sidebar} ${isDarkMode ? styles.dark : ''}`}>
-          <div className={styles.header}>
-            <div className={styles.logo}>
-              <span className={styles.logoText}>Init</span>
+        <>
+          <button className={styles.mobileMenuButton} style={{ opacity: 0 }}>
+            <Menu />
+          </button>
+          <aside className={`${styles.sidebar} ${isDarkMode ? styles.dark : ''}`}>
+            <div className={styles.header}>
+              <div className={styles.logo}>
+                <span className={styles.logoText}>Init</span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#356ae4] mx-auto mb-4"></div>
-              <p className="text-gray-600">사용자 정보 로딩 중...</p>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#356ae4] mx-auto mb-4"></div>
+                <p className="text-gray-600">사용자 정보 로딩 중...</p>
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        </>
     );
   }
 
   return (
-      <aside className={`${styles.sidebar} ${isDarkMode ? styles.dark : ''}`}>
-        <div className={styles.header}>
-          <div className={styles.logo}>
-            <span className={styles.logoText}>Init</span>
-          </div>
-          <div className={styles.headerControls}>
-            <button className={styles.themeToggle} onClick={toggleTheme}>
-              {isDarkMode ? <Sun className={styles.themeIcon} /> : <Moon className={styles.themeIcon} />}
-            </button>
-          </div>
-        </div>
+      <>
+        {/* 모바일 메뉴 버튼 */}
+        <button
+            className={`${styles.mobileMenuButton} ${isDarkMode ? styles.dark : ''}`}
+            onClick={toggleMobileMenu}
+            aria-label="메뉴 열기/닫기"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
 
-        <nav className={styles.nav}>
-          <ul className={styles.menuList}>
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                  <li key={item.id} className={styles.menuItem}>
-                    <Link href={item.href} className={`${styles.menuLink} ${isActive ? styles.active : ''}`}>
-                      <Icon className={styles.menuIcon} />
-                      <span className={styles.menuLabel}>{item.label}</span>
-                      {isActive && <div className={styles.activeIndicator} />}
-                    </Link>
-                  </li>
-              );
-            })}
-          </ul>
-        </nav>
+        {/* 모바일 오버레이 */}
+        {isMobile && isMobileMenuOpen && (
+            <div
+                className={styles.mobileOverlay}
+                onClick={() => setIsMobileMenuOpen(false)}
+            />
+        )}
 
-        <div className={styles.userProfile}>
-          <div className={styles.userInfo}>
-            <div className={styles.avatar}>
-              {userProfile.avatar ? (
-                  <Image src={userProfile.avatar} alt={userProfile.name} width={40} height={40} className={styles.avatarImage} />
-              ) : (
-                  <div className={styles.avatarPlaceholder}>
-                    {userProfile.name.charAt(0).toUpperCase()}
-                  </div>
+        {/* 사이드바 */}
+        <aside className={`
+        ${styles.sidebar} 
+        ${isDarkMode ? styles.dark : ''} 
+        ${isMobile && isMobileMenuOpen ? styles.mobileOpen : ''}
+        ${isMobile && !isMobileMenuOpen ? styles.mobileHidden : ''}
+      `}>
+          <div className={styles.header}>
+            <div className={styles.logo}>
+              <span className={styles.logoText}>Init</span>
+            </div>
+            <div className={styles.headerControls}>
+              <button className={styles.themeToggle} onClick={toggleTheme}>
+                {isDarkMode ? <Sun className={styles.themeIcon} /> : <Moon className={styles.themeIcon} />}
+              </button>
+              {/* 모바일에서는 닫기 버튼도 추가 */}
+              {isMobile && (
+                  <button
+                      className={styles.mobileCloseButton}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      aria-label="메뉴 닫기"
+                  >
+                    <X className={styles.themeIcon} />
+                  </button>
               )}
             </div>
-            <div className={styles.userDetails}>
-              <div className={styles.userName}>{userProfile.name}</div>
-              <div className={styles.userEmail}>{userProfile.email}</div>
+          </div>
+
+          <nav className={styles.nav}>
+            <ul className={styles.menuList}>
+              {menuItems.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                    <li key={item.id} className={styles.menuItem}>
+                      <Link href={item.href} className={`${styles.menuLink} ${isActive ? styles.active : ''}`}>
+                        <Icon className={styles.menuIcon} />
+                        <span className={styles.menuLabel}>{item.label}</span>
+                        {isActive && <div className={styles.activeIndicator} />}
+                      </Link>
+                    </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div className={styles.userProfile}>
+            <div className={styles.userInfo}>
+              <div className={styles.avatar}>
+                {userProfile.avatar ? (
+                    <Image src={userProfile.avatar} alt={userProfile.name} width={40} height={40} className={styles.avatarImage} />
+                ) : (
+                    <div className={styles.avatarPlaceholder}>
+                      {userProfile.name.charAt(0).toUpperCase()}
+                    </div>
+                )}
+              </div>
+              <div className={styles.userDetails}>
+                <div className={styles.userName}>{userProfile.name}</div>
+                <div className={styles.userEmail}>{userProfile.email}</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className={styles.logoutSection}>
-          <button className={styles.logoutButton} onClick={handleLogout}>
-            로그아웃
-          </button>
-        </div>
-      </aside>
+          <div className={styles.logoutSection}>
+            <button className={styles.logoutButton} onClick={handleLogout}>
+              로그아웃
+            </button>
+          </div>
+        </aside>
+      </>
   );
 }

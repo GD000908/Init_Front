@@ -66,7 +66,7 @@ export default function UserJobCalendarPage() {
                 - pr-8: 오른쪽 여백 추가 (32px)
                 - px-8: 좌우 여백을 동일하게 주는 경우 사용 가능
             */}
-            <main className="flex-1 p-6 pl-72 pr-8 overflow-x-hidden">
+            <main className="flex-1 p-4 sm:p-6 ml-0 md:ml-64 lg:ml-72 overflow-x-hidden transition-all duration-300">
                 <JobCalendarView />
             </main>
         </div>
