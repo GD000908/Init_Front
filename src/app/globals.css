@@ -35,7 +35,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* 첫 번째 파일의 고유한 사이드바 변수 추가 */
+    /* 사이드바 커스텀 변수 */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -73,7 +73,7 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    /* 첫 번째 파일의 고유한 사이드바 변수 추가 (다크 모드) */
+    /* 사이드바 커스텀 변수 (다크 모드) */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -84,7 +84,7 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  /* --- 기본 태그 스타일 (중복 제거 후 통합) --- */
+  /* --- 기본 태그 스타일 --- */
   * {
     @apply border-border;
   }
@@ -106,11 +106,11 @@
 }
 
 /* ================================================================
-  3. CUSTOM GLOBAL STYLES: 전역 커스텀 스타일
+  3. GLOBAL STYLES: 전역 커스텀 스타일
   ================================================================
 */
 
-/* --- 전역 커스텀 스크롤바 (다크 모드 지원) --- */
+/* --- 전역 커스텀 스크롤바 --- */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -125,15 +125,14 @@
   background: #a8a8a8;
 }
 
-/* 다크모드 스크롤바 */
 .dark ::-webkit-scrollbar-track {
-  background: #374151; /* Gray-700 */
+  background: #374151;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #6b7280; /* Gray-500 */
+  background: #6b7280;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af; /* Gray-400 */
+  background: #9ca3af;
 }
 
 /* --- React Day Picker (달력) 커스텀 --- */
@@ -172,11 +171,11 @@
 }
 
 /* ================================================================
-  4. 개선된 모바일 가로모드 방지 시스템
+  4. 스마트 모바일 가로모드 방지 시스템
   ================================================================
 */
 
-/* 가로모드 경고 오버레이 (기본적으로 숨김) */
+/* 가로모드 경고 오버레이 기본 스타일 */
 .landscape-warning {
   display: none;
   position: fixed;
@@ -186,7 +185,7 @@
   height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  z-index: 99999;
+  z-index: 999999;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -217,24 +216,69 @@
 
 /* 회전 애니메이션 */
 @keyframes rotate-shake {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-5deg) scale(1.1); }
-  50% { transform: rotate(0deg) scale(1); }
-  75% { transform: rotate(5deg) scale(1.1); }
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-5deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(0deg) scale(1);
+  }
+  75% {
+    transform: rotate(5deg) scale(1.1);
+  }
 }
 
-/* 모바일 가로모드에서만 경고 표시 */
-@media screen and (max-width: 768px) and (orientation: landscape) and (max-height: 500px) {
+/* 🎯 핵심 로직: 높이 기반 모바일 가로모드 감지 */
+/*
+   사이드바 100vh 기준으로 판단:
+   - 모바일 세로: 800px+ (사이드바 정상 표시)
+   - 모바일 가로: 400px 이하 (사이드바 넘침)
+   - 태블릿: 가로든 세로든 600px+ (문제없음)
+   - 웹/데스크톱: 항상 600px+ (문제없음)
+*/
+
+/* 1차 감지: 높이 500px 이하 + 가로모드 */
+@media screen and (max-height: 500px) and (orientation: landscape) {
   .landscape-warning {
     display: flex !important;
   }
 
-  /* 메인 콘텐츠 숨김 */
   body > *:not(.landscape-warning) {
     display: none !important;
   }
 
-  /* body 오버플로우 방지 */
+  body {
+    overflow: hidden !important;
+  }
+}
+
+/* 2차 감지: 가로세로 비율로 확실한 가로모드 감지 */
+@media screen and (max-height: 600px) and (min-aspect-ratio: 3/2) {
+  .landscape-warning {
+    display: flex !important;
+  }
+
+  body > *:not(.landscape-warning) {
+    display: none !important;
+  }
+
+  body {
+    overflow: hidden !important;
+  }
+}
+
+/* 3차 감지: 극단적으로 낮은 높이는 무조건 모바일 가로모드 */
+@media screen and (max-height: 400px) {
+  .landscape-warning {
+    display: flex !important;
+  }
+
+  body > *:not(.landscape-warning) {
+    display: none !important;
+  }
+
   body {
     overflow: hidden !important;
   }
