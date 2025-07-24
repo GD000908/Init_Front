@@ -3,6 +3,7 @@
 import React, {useState} from "react"
 import {Eye, EyeOff, Check, X, Loader2} from "lucide-react"
 import {authApi} from "@/lib/auth-api"
+import Link from "next/link"
 
 interface SignupFormProps {
     formData: {
@@ -36,6 +37,12 @@ const interests = [
     "특수직",
 ]
 
+// 사용 가능한 특수문자 목록
+const ALLOWED_SPECIAL_CHARS = "!@#$%^&*(),.?\":{}|<>";
+
+// 특수문자 검증을 위한 정규식
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*(),.?":{}|<>]/;
+
 function PasswordCheck({ok, label}: { ok: boolean; label: string }) {
     return (
         <div className="flex items-center gap-2">
@@ -43,6 +50,37 @@ function PasswordCheck({ok, label}: { ok: boolean; label: string }) {
             <span className={ok ? "text-green-600" : "text-red-600"}>{label}</span>
         </div>
     )
+}
+
+// 아이디 유효성 검사 함수
+function validateUserId(userId: string): { isValid: boolean; message: string } {
+    if (!userId) {
+        return { isValid: false, message: '' };
+    }
+
+    if (userId.length < 4) {
+        return { isValid: false, message: '아이디는 4자 이상이어야 합니다.' };
+    }
+
+    if (userId.length > 12) {
+        return { isValid: false, message: '아이디는 12자 이하여야 합니다.' };
+    }
+
+    // 영문과 숫자만 허용하는 정규식
+    const userIdPattern = /^[a-zA-Z0-9]+$/;
+    if (!userIdPattern.test(userId)) {
+        return { isValid: false, message: '아이디는 영문과 숫자만 사용 가능합니다.' };
+    }
+
+    // 영문과 숫자 모두 포함되어야 함
+    const hasLetter = /[a-zA-Z]/.test(userId);
+    const hasNumber = /[0-9]/.test(userId);
+
+    if (!hasLetter || !hasNumber) {
+        return { isValid: false, message: '아이디는 영문과 숫자를 모두 포함해야 합니다.' };
+    }
+
+    return { isValid: true, message: '사용 가능한 아이디 형식입니다.' };
 }
 
 export default function SignupForm({
@@ -70,12 +108,15 @@ export default function SignupForm({
     const [emailVerificationCode, setEmailVerificationCode] = useState('');
     const [isSignupLoading, setIsSignupLoading] = useState(false);
 
+    // 아이디 유효성 검사
+    const userIdValidation = validateUserId(formData.userId);
+
     // 비밀번호 유효성 검사
     const isPasswordValid =
         formData.password.length >= 8 &&
         /[a-zA-Z]/.test(formData.password) &&
         /\d/.test(formData.password) &&
-        /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
+        SPECIAL_CHAR_REGEX.test(formData.password);
 
     const isPasswordMatch = formData.password === formData.confirmPassword;
 
@@ -102,10 +143,10 @@ export default function SignupForm({
 
     // 아이디 중복확인 함수
     const handleUserIdCheck = async () => {
-        if (!formData.userId || formData.userId.trim().length < 4) {
+        if (!userIdValidation.isValid) {
             setUserIdCheck({
                 status: 'error',
-                message: '아이디는 4자 이상 입력해주세요.'
+                message: userIdValidation.message
             });
             return;
         }
@@ -198,6 +239,12 @@ export default function SignupForm({
         setEmailCheck({status: 'none', message: ''});
     };
 
+    // 아이디 입력 변경 시 처리
+    const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(e);
+        setUserIdCheck({status: 'none', message: ''});
+    };
+
     // 휴대폰 번호 입력 핸들러
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formatted = formatPhoneNumber(e.target.value);
@@ -250,6 +297,14 @@ export default function SignupForm({
              style={{backfaceVisibility: "hidden"}}>
 
             <div className="relative mb-4 sm:mb-5">
+                {/* 홈으로 가는 로고 */}
+                <Link
+                    href="/"
+                    className="absolute left-0 top-0 text-lg sm:text-xl font-bold text-[#8b5cf6] hover:text-[#6366f1] transition-colors"
+                >
+                    Init
+                </Link>
+
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-[#8b5cf6]">
                     회원가입
                 </h2>
@@ -282,15 +337,15 @@ export default function SignupForm({
                             type="text"
                             name="userId"
                             value={formData.userId}
-                            onChange={e => {onChange(e); setUserIdCheck({status: 'none', message: ''})}}
-                            placeholder="영문, 숫자 조합 4-12자"
+                            onChange={handleUserIdChange}
+                            placeholder="영문+숫자 조합 4-12자"
                             className="flex-1 px-2 sm:px-3 py-2 sm:py-3 border border-slate-300 rounded-lg
                                      text-xs sm:text-sm bg-white/50 focus:outline-none focus:border-[#8b5cf6]"
                         />
                         <button
                             type="button"
                             onClick={handleUserIdCheck}
-                            disabled={userIdCheck.status === 'checking' || !formData.userId}
+                            disabled={userIdCheck.status === 'checking' || !formData.userId || !userIdValidation.isValid}
                             className="bg-[#6366f1] text-white hover:bg-[#8b5cf6]
                                      px-2 sm:px-3 py-2 sm:py-3 rounded-lg
                                      text-xs font-medium flex items-center gap-1 disabled:opacity-50
@@ -300,6 +355,16 @@ export default function SignupForm({
                             중복확인
                         </button>
                     </div>
+
+                    {/* 아이디 유효성 검사 메시지 */}
+                    {formData.userId && !userIdValidation.isValid && (
+                        <div className="mt-1 text-xs flex items-center gap-1 text-red-600">
+                            <X className="h-3 w-3"/>
+                            <span>{userIdValidation.message}</span>
+                        </div>
+                    )}
+
+                    {/* 아이디 중복확인 메시지 */}
                     {userIdCheck.message && (
                         <div className={`mt-1 text-xs flex items-center gap-1 ${
                             userIdCheck.status==='available'?'text-green-600':userIdCheck.status==='duplicate'?'text-red-600':'text-gray-600'}`}>
@@ -309,6 +374,12 @@ export default function SignupForm({
                             <span>{userIdCheck.message}</span>
                         </div>
                     )}
+
+                    {/* 아이디 규칙 안내 */}
+                    <div className="mt-1 text-xs text-slate-500">
+                        • 영문과 숫자를 모두 포함한 4-12자
+                        • 특수문자는 사용할 수 없습니다
+                    </div>
                 </div>
 
                 {/* 비밀번호 */}
@@ -336,11 +407,20 @@ export default function SignupForm({
                         <div className="mt-2 space-y-1 text-xs">
                             <PasswordCheck ok={formData.password.length >= 8} label="8자 이상"/>
                             <PasswordCheck
-                                ok={/[a-zA-Z]/.test(formData.password)&&/\d/.test(formData.password)&&/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)}
-                                label="영문, 숫자, 특수문자 포함"
+                                ok={/[a-zA-Z]/.test(formData.password)&&/\d/.test(formData.password)}
+                                label="영문, 숫자 포함"
+                            />
+                            <PasswordCheck
+                                ok={SPECIAL_CHAR_REGEX.test(formData.password)}
+                                label="특수문자 포함"
                             />
                         </div>
                     )}
+
+                    {/* 사용 가능한 특수문자 목록 */}
+                    <div className="mt-1 text-xs text-slate-500">
+                        사용 가능한 특수문자: {ALLOWED_SPECIAL_CHARS}
+                    </div>
                 </div>
 
                 {/* 비밀번호 확인 */}
