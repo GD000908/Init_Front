@@ -72,12 +72,11 @@ function validateUserId(userId: string): { isValid: boolean; message: string } {
         return { isValid: false, message: '아이디는 영문과 숫자만 사용 가능합니다.' };
     }
 
-    // 영문과 숫자 모두 포함되어야 함
+    // 최소한 영문은 포함되어야 함 (순수 숫자만은 불가)
     const hasLetter = /[a-zA-Z]/.test(userId);
-    const hasNumber = /[0-9]/.test(userId);
 
-    if (!hasLetter || !hasNumber) {
-        return { isValid: false, message: '아이디는 영문과 숫자를 모두 포함해야 합니다.' };
+    if (!hasLetter) {
+        return { isValid: false, message: '아이디는 최소한 영문을 포함해야 합니다.' };
     }
 
     return { isValid: true, message: '사용 가능한 아이디 형식입니다.' };
@@ -296,16 +295,17 @@ export default function SignupForm({
                        flex flex-col overflow-hidden"
              style={{backfaceVisibility: "hidden"}}>
 
-            <div className="relative mb-4 sm:mb-5">
-                {/* 홈으로 가는 로고 */}
+            <div className="text-center mb-4 sm:mb-5">
+                {/* 홈으로 가는 로고 - 크게 */}
                 <Link
                     href="/"
-                    className="absolute left-0 top-0 text-lg sm:text-xl font-bold text-[#8b5cf6] hover:text-[#6366f1] transition-colors"
+                    className="inline-block text-3xl sm:text-4xl md:text-5xl font-bold text-[#8b5cf6] hover:text-[#6366f1] transition-all hover:scale-105 mb-2"
                 >
                     Init
                 </Link>
 
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-[#8b5cf6]">
+                {/* 회원가입 텍스트 - 작게 */}
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-600">
                     회원가입
                 </h2>
             </div>
@@ -338,7 +338,7 @@ export default function SignupForm({
                             name="userId"
                             value={formData.userId}
                             onChange={handleUserIdChange}
-                            placeholder="영문+숫자 조합 4-12자"
+                            placeholder="영문 또는 영문+숫자 4-12자"
                             className="flex-1 px-2 sm:px-3 py-2 sm:py-3 border border-slate-300 rounded-lg
                                      text-xs sm:text-sm bg-white/50 focus:outline-none focus:border-[#8b5cf6]"
                         />
@@ -377,7 +377,7 @@ export default function SignupForm({
 
                     {/* 아이디 규칙 안내 */}
                     <div className="mt-1 text-xs text-slate-500">
-                        • 영문과 숫자를 모두 포함한 4-12자
+                        • 영문 필수, 숫자 선택적 포함 가능한 4-12자
                         • 특수문자는 사용할 수 없습니다
                     </div>
                 </div>
