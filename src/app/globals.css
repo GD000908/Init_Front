@@ -136,7 +136,6 @@
   background: #9ca3af; /* Gray-400 */
 }
 
-
 /* --- React Day Picker (달력) 커스텀 --- */
 .rdp {
   margin: 0;
@@ -172,26 +171,71 @@
   margin: 0 !important;
 }
 
-/* 휴대폰 크기에서만 가로 모드 방지 */
-@media (max-width: 480px) and (orientation: landscape) {
-  body::before {
-    content: "📱 세로 모드로 회전해주세요";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    z-index: 9999;
-    text-align: center;
+/* ================================================================
+  4. 개선된 모바일 가로모드 방지 시스템
+  ================================================================
+*/
+
+/* 가로모드 경고 오버레이 (기본적으로 숨김) */
+.landscape-warning {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  z-index: 99999;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.landscape-warning .icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  animation: rotate-shake 2s ease-in-out infinite;
+}
+
+.landscape-warning .title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.landscape-warning .subtitle {
+  font-size: 1rem;
+  opacity: 0.8;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+/* 회전 애니메이션 */
+@keyframes rotate-shake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-5deg) scale(1.1); }
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(5deg) scale(1.1); }
+}
+
+/* 모바일 가로모드에서만 경고 표시 */
+@media screen and (max-width: 768px) and (orientation: landscape) and (max-height: 500px) {
+  .landscape-warning {
+    display: flex !important;
   }
 
-  body > * {
-    display: none;
+  /* 메인 콘텐츠 숨김 */
+  body > *:not(.landscape-warning) {
+    display: none !important;
+  }
+
+  /* body 오버플로우 방지 */
+  body {
+    overflow: hidden !important;
   }
 }

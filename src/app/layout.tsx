@@ -16,6 +16,12 @@ const ScrollToTop = dynamic(() => import('@/components/ScrollToTop'), {
     loading: () => null
 });
 
+// 🔥 OrientationLock 컴포넌트 동적 임포트
+const OrientationLock = dynamic(() => import('@/components/OrientationLock'), {
+    ssr: false,
+    loading: () => null
+});
+
 // 🔥 클라이언트 전용 인증 로직을 별도 컴포넌트로 분리
 const AuthenticatedLayout = dynamic(() => import('@/components/AuthenticatedLayout'), {
     ssr: false,
@@ -81,6 +87,7 @@ export default function RootLayout({
                 <meta name="generator" content="v0.dev" />
             </head>
             <body>
+            <OrientationLock />  {/* 🔥 모든 페이지에 OrientationLock 추가 */}
             <div className="app-layout">
                 <main className="main-content-full">
                     {children}
@@ -101,6 +108,7 @@ export default function RootLayout({
             <meta name="generator" content="v0.dev" />
         </head>
         <body>
+        <OrientationLock />  {/* 🔥 보호된 페이지에도 OrientationLock 추가 */}
         <AuthenticatedLayout pathname={pathname}>
             {children}
         </AuthenticatedLayout>
