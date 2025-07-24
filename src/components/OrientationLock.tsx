@@ -4,67 +4,113 @@ import { useEffect, useState } from 'react'
 
 export default function OrientationLock() {
     const [isLandscape, setIsLandscape] = useState(false)
+    const [debugInfo, setDebugInfo] = useState('')
 
     useEffect(() => {
+        console.log('🔍 OrientationLock 컴포넌트 마운트됨')
+
         // 방향 변경 감지 함수
         const checkOrientation = () => {
-            const isMobile = window.innerWidth <= 768
-            const isLandscapeMode = window.innerWidth > window.innerHeight
-            const isShortHeight = window.innerHeight <= 500
+            const width = window.innerWidth
+            const height = window.innerHeight
+            const isMobile = width <= 768
+            const isLandscapeMode = width > height
+            const isShortHeight = height <= 500
 
-            // 모바일에서 가로모드이고 높이가 500px 이하일 때만 경고 표시
-            setIsLandscape(isMobile && isLandscapeMode && isShortHeight)
+            const shouldShowWarning = isMobile && isLandscapeMode && isShortHeight
+
+            // 디버깅 정보
+            const debug = `
+                Width: ${width}px
+                Height: ${height}px
+                IsMobile: ${isMobile}
+                IsLandscape: ${isLandscapeMode}
+                IsShortHeight: ${isShortHeight}
+                ShouldShow: ${shouldShowWarning}
+            `
+
+            console.log('📱 Orientation Check:', debug)
+            setDebugInfo(debug)
+            setIsLandscape(shouldShowWarning)
         }
 
         // 초기 체크
         checkOrientation()
 
         // 이벤트 리스너 등록
-        window.addEventListener('resize', checkOrientation)
-        window.addEventListener('orientationchange', () => {
-            // orientationchange 이벤트는 약간의 지연이 있을 수 있으므로 setTimeout 사용
+        const handleResize = () => {
+            console.log('📏 Resize 이벤트 발생')
+            checkOrientation()
+        }
+
+        const handleOrientationChange = () => {
+            console.log('🔄 OrientationChange 이벤트 발생')
             setTimeout(checkOrientation, 100)
-        })
+        }
+
+        window.addEventListener('resize', handleResize)
+        window.addEventListener('orientationchange', handleOrientationChange)
 
         // 정리
         return () => {
-            window.removeEventListener('resize', checkOrientation)
-            window.removeEventListener('orientationchange', checkOrientation)
+            console.log('🧹 OrientationLock 정리')
+            window.removeEventListener('resize', handleResize)
+            window.removeEventListener('orientationchange', handleOrientationChange)
         }
     }, [])
 
-    // Screen Orientation API 시도 (지원하는 브라우저에서만)
-    useEffect(() => {
-        if (typeof window !== 'undefined' && 'screen' in window && 'orientation' in window.screen) {
-            // 전체화면 모드에서만 orientation lock이 가능
-            const lockOrientation = async () => {
-                try {
-                    if (document.fullscreenElement) {
-                        await (window.screen.orientation as any).lock('portrait')
-                    }
-                } catch (error) {
-                    console.log('Orientation lock not supported or failed:', error)
-                }
-            }
+    console.log('🎯 OrientationLock 렌더링:', { isLandscape })
 
-            // 전체화면 모드 감지
-            document.addEventListener('fullscreenchange', lockOrientation)
+    // 항상 디버그 정보 표시 (개발 중에만)
+    if (process.env.NODE_ENV === 'development') {
+        return (
+            <>
+                {/* 디버그 정보 - 개발 모드에서만 표시 */}
+                <div style={{
+                    position: 'fixed',
+                    top: '10px',
+                    right: '10px',
+                    background: 'rgba(0,0,0,0.8)',
+                    color: 'white',
+                    padding: '10px',
+                    fontSize: '12px',
+                    fontFamily: 'monospace',
+                    zIndex: 999999,
+                    borderRadius: '5px',
+                    whiteSpace: 'pre-line'
+                }}>
+                    DEBUG: {debugInfo}
+                    <br />
+                    Show Warning: {isLandscape ? 'YES' : 'NO'}
+                </div>
 
-            return () => {
-                document.removeEventListener('fullscreenchange', lockOrientation)
-            }
-        }
-    }, [])
+                {/* 실제 경고 화면 */}
+                {isLandscape && (
+                    <div className="landscape-warning">
+                        <div className="icon">📱</div>
+                        <div className="title">화면을 조정해주세요</div>
+                        <div className="subtitle">
+                            더 나은 경험을 위해<br />
+                            • 모바일: 세로 모드로 회전<br />
+                            • PC/태블릿: 창 크기 확대
+                        </div>
+                    </div>
+                )}
+            </>
+        )
+    }
 
+    // 프로덕션에서는 경고 화면만 표시
     if (!isLandscape) return null
 
     return (
         <div className="landscape-warning">
             <div className="icon">📱</div>
-            <div className="title">세로 모드로 사용해주세요</div>
+            <div className="title">화면을 조정해주세요</div>
             <div className="subtitle">
                 더 나은 경험을 위해<br />
-                휴대폰을 세로로 회전해주세요
+                • 모바일: 세로 모드로 회전<br />
+                • PC/태블릿: 창 크기 확대
             </div>
         </div>
     )
