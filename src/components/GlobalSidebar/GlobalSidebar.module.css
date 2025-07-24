@@ -394,6 +394,22 @@
 /* ================================================================
    반응형 디자인 - 모바일
    ================================================================ */
+/* 휴대폰 가로 모드 전용 */
+@media (max-width: 968px) and (max-height: 500px) and (orientation: landscape) {
+  .mobileMenuButton {
+    display: flex; /* 가로 모드에서도 햄버거 메뉴 사용 */
+  }
+
+  .sidebar {
+    transform: translateX(-100%); /* 기본적으로 숨김 */
+    width: 300px; /* 가로 모드에서는 조금 더 넓게 */
+  }
+
+  .sidebar.mobileOpen {
+    transform: translateX(0);
+  }
+}
+
 @media (max-width: 768px) {
   /* 모바일 메뉴 버튼 표시 */
   .mobileMenuButton {
