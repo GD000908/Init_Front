@@ -1,7 +1,8 @@
+/* style.module.css 수정 */
 .pageContainer {
   min-height: 100vh;
   background: #f8fafc;
-  margin-left: 18px;
+  margin-left: 0; /* 기본값을 0으로 */
   transition: background-color 0.3s ease;
 }
 
@@ -767,9 +768,14 @@
 :global(.dark) .closeBtn:hover {
   background: #64748b;
 }
+@media (min-width: 769px) {
+  .pageContainer {
+    margin-left: 280px; /* 사이드바 너비에 맞춤 */
+  }
+}
 
-/* 기존 768px 미디어 쿼리를 1023px로 확장 */
-@media (max-width: 1023px) {
+/* 수정 후 */
+@media (max-width: 768px) {
   .pageContainer {
     margin-left: 0;
   }
