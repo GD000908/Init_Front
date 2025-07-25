@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {Eye, EyeOff, Check, X, Loader2} from "lucide-react"
 import {authApi} from "@/lib/auth-api"
 import Link from "next/link"
@@ -23,6 +23,51 @@ interface SignupFormProps {
     setShowConfirmPassword: (v: boolean) => void
     onFlip: () => void
 }
+
+// 🔥 디버깅 컴포넌트
+const EmailVerificationDebugger = ({ emailCheck }: { emailCheck: any }) => {
+    const [debugInfo, setDebugInfo] = useState<any>({});
+
+    const updateDebugInfo = () => {
+        const sessionStatus = (window as any).authApi?.getSessionStatus?.() || {};
+        const info = {
+            timestamp: new Date().toLocaleTimeString(),
+            emailCheckStatus: emailCheck.status,
+            sessionStatus,
+            isMobile: /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent),
+            url: window.location.href,
+        };
+        setDebugInfo(info);
+    };
+
+    useEffect(() => {
+        updateDebugInfo();
+        const interval = setInterval(updateDebugInfo, 2000);
+        return () => clearInterval(interval);
+    }, [emailCheck.status]);
+
+    // 개발 환경에서만 표시
+    if (process.env.NODE_ENV !== 'development') return null;
+
+    return (
+        <div className="bg-gray-100 p-3 rounded text-xs mb-4 font-mono">
+            <div className="font-bold mb-2">🔍 Email Verification Debug</div>
+            <div>Status: <span className="font-bold">{emailCheck.status}</span></div>
+            <div>Mobile: {debugInfo.isMobile ? 'Yes' : 'No'}</div>
+            <div>Current Session: {debugInfo.sessionStatus?.current?.substring(0, 8) || 'None'}</div>
+            <div>Send Session: {debugInfo.sessionStatus?.tracker?.sendSessionId?.substring(0, 8) || 'None'}</div>
+            <div>Verify Session: {debugInfo.sessionStatus?.tracker?.verifySessionId?.substring(0, 8) || 'None'}</div>
+            <div>Time Since Send: {debugInfo.sessionStatus?.timeSinceSend ? Math.floor(debugInfo.sessionStatus.timeSinceSend / 1000) + 's' : 'N/A'}</div>
+            <div>Last Update: {debugInfo.timestamp}</div>
+            <button
+                onClick={updateDebugInfo}
+                className="mt-2 bg-blue-500 text-white px-2 py-1 rounded text-xs"
+            >
+                Refresh
+            </button>
+        </div>
+    );
+};
 
 const interests = [
     "경영/기획/전략",
@@ -106,6 +151,11 @@ export default function SignupForm({
 
     const [emailVerificationCode, setEmailVerificationCode] = useState('');
     const [isSignupLoading, setIsSignupLoading] = useState(false);
+
+    // 🔥 authApi를 전역에 노출 (디버깅용)
+    useEffect(() => {
+        (window as any).authApi = authApi;
+    }, []);
 
     // 아이디 유효성 검사
     const userIdValidation = validateUserId(formData.userId);
@@ -197,12 +247,26 @@ export default function SignupForm({
                 return;
             }
 
+            // 🔥 모바일 대기 시간 추가
+            const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                console.log('📱 모바일 환경에서 이메일 발송 준비...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            console.log('📧 이메일 인증 발송 시작:', formData.email);
+
             const result = await authApi.sendEmailVerificationCode(formData.email);
 
             setEmailCheck({
                 status: 'sent',
                 message: result
             });
+
+            // 🔥 발송 성공 시 입력 필드 초기화 및 포커스
+            setEmailVerificationCode('');
+
+            console.log('✅ 이메일 인증 발송 완료');
 
         } catch (error) {
             setEmailCheck({
@@ -212,7 +276,7 @@ export default function SignupForm({
         }
     };
 
-    // 이메일 인증번호 확인 함수
+    // 🔥 이메일 인증번호 확인 함수 (디버깅 정보 포함)
     const handleEmailVerificationCheck = async () => {
         if (!emailVerificationCode || emailVerificationCode.length !== 6) {
             alert('인증번호 6자리를 입력해주세요.');
@@ -220,15 +284,56 @@ export default function SignupForm({
         }
 
         try {
+            console.log('🔐 인증 시작 전 세션 상태 확인');
+
+            const sessionStatus = authApi.getSessionStatus();
+            console.log('📊 현재 세션 상태:', sessionStatus);
+
+            // 🔥 세션이 없거나 변경되었다면 경고
+            if (!sessionStatus.current) {
+                console.warn('⚠️ 세션 ID가 없습니다!');
+                alert('세션이 만료되었습니다. 인증번호를 다시 요청해주세요.');
+                setEmailCheck({ status: 'none', message: '' });
+                return;
+            }
+
+            if (sessionStatus.tracker.sendSessionId &&
+                sessionStatus.current !== sessionStatus.tracker.sendSessionId) {
+                console.warn('⚠️ 세션 ID가 변경되었습니다!', {
+                    original: sessionStatus.tracker.sendSessionId,
+                    current: sessionStatus.current
+                });
+            }
+
             const result = await authApi.verifyEmailCode(formData.email, emailVerificationCode);
 
             setEmailCheck({
                 status: 'verified',
                 message: result
             });
+
+            console.log('✅ 이메일 인증 성공');
+
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '인증 확인 중 오류가 발생했습니다.';
+            console.error('❌ 이메일 인증 실패:', error);
+
+            // 🔥 세션 상태 재확인
+            const finalSessionStatus = authApi.getSessionStatus();
+            console.log('❌ 실패 시 세션 상태:', finalSessionStatus);
+
+            let errorMessage = '인증 확인 중 오류가 발생했습니다.';
+
+            if (error instanceof Error) {
+                if (error.message.includes('만료')) {
+                    errorMessage = `인증번호가 만료되었습니다.\n세션 정보: ${finalSessionStatus.current?.substring(0, 8) || 'None'}\n경과 시간: ${finalSessionStatus.timeSinceSend ? Math.floor(finalSessionStatus.timeSinceSend / 1000) : 'N/A'}초`;
+                    setEmailCheck({ status: 'none', message: '' });
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+
             alert(errorMessage);
+            setEmailVerificationCode('');
         }
     };
 
@@ -309,6 +414,9 @@ export default function SignupForm({
                     회원가입
                 </h2>
             </div>
+
+            {/* 🔥 디버깅 컴포넌트 추가 */}
+            <EmailVerificationDebugger emailCheck={emailCheck} />
 
             <div className="flex-1 overflow-y-auto pr-2 sm:pr-3 space-y-3 sm:space-y-4"
                  style={{scrollbarWidth: "thin", scrollbarColor: "rgba(100,100,100,0.3) transparent"}}>
