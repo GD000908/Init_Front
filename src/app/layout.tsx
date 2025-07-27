@@ -11,7 +11,7 @@ const GlobalSidebar = dynamic(() => import('@/components/GlobalSidebar'), {
     loading: () => null
 });
 
-const ScrollToTop = dynamic(() => import('@/components/ScrollToTop'), {
+const ScrollToTop = dynamic(() => import('@/components/ScrollToTop1'), {
     ssr: false,
     loading: () => null
 });
