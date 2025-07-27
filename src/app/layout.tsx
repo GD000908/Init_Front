@@ -11,10 +11,10 @@ const GlobalSidebar = dynamic(() => import('@/components/GlobalSidebar'), {
     loading: () => null
 });
 
-const ScrollToTop = dynamic(() => import('@/components/ScrollToTop1'), {
-    ssr: false,
-    loading: () => null
-});
+// const ScrollToTop = dynamic(() => import('@/components/ScrollToTop'), {
+//     ssr: false,
+//     loading: () => null
+// });
 
 // 🔥 OrientationLock 컴포넌트 동적 임포트
 const OrientationLock = dynamic(() => import('@/components/OrientationLock'), {
