@@ -92,7 +92,7 @@ export default function RootLayout({
                 <main className="main-content-full">
                     {children}
                 </main>
-                <ScrollToTop />
+{/*                 <ScrollToTop /> */}
             </div>
             </body>
             </html>
