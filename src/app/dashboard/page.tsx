@@ -10,20 +10,17 @@ import {
     AlertCircle, Star, Edit2, Loader2,
     PieChart as PieChartIcon, TrendingUp, Briefcase, ArrowRight,
     Award, Camera, Link, Languages, GraduationCap, Trash2,
-    Building, ExternalLink, RefreshCw, Shield
+    Shield
 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import EnhancedJobRecommendations from '@/components/EnhancedJobRecommendations'
 
-
 // API 기본 URL
-
 const API_BASE_URL = "https://initback-production-67bf.up.railway.app/api/home";
 
-
 // 유틸리티 함수
-const cn = (...inputs: any[]) => {
+const cn = (...inputs: (string | undefined | null | boolean)[]) => {
     const classes = inputs.filter(Boolean);
     return classes.join(' ');
 }
@@ -83,28 +80,6 @@ interface ProfileCompletionData {
     completionPercentage: number;
 }
 
-// 🔥 개선된 JobRecommendation 타입
-interface JobRecommendation {
-    id?: string;
-    company: string;
-    title: string;
-    location: string;
-    experience: string;
-    education: string;
-    employmentType: string;
-    salary: string;
-    deadline: string;
-    url: string;
-    // 백엔드 응답에 추가된 필드들
-    keywords?: string[];
-    postedDate?: string;
-    matchScore?: number;
-    description?: string;
-    requirements?: string;
-    benefits?: string;
-    recruitCount?: string;
-}
-
 // 토큰 관리 유틸리티
 const getAuthHeaders = () => {
     const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken');
@@ -135,13 +110,11 @@ const handleApiError = async (response: Response) => {
         throw new Error('Authentication failed');
     }
 
-    // 🔥 200-299 범위는 성공으로 처리
     if (response.ok) {
         console.log('✅ API 응답 성공');
-        return; // 성공 시 그냥 리턴
+        return;
     }
 
-    // 실제 에러인 경우에만 에러 처리
     let errorMessage = `HTTP error! status: ${response.status}`;
     try {
         const errorText = await response.text();
@@ -156,7 +129,7 @@ const handleApiError = async (response: Response) => {
     throw new Error(errorMessage);
 };
 
-// API 함수들 (JWT 인증 적용)
+// API 함수들 (공고 관련 제거)
 const api = {
     // Profile
     getProfile: async (userId: number): Promise<ProfileData> => {
@@ -205,7 +178,6 @@ const api = {
         return response.json();
     },
 
-// 🔥 updateApplicationsBatch 메서드도 URL 수정
     updateApplicationsBatch: async (userId: number, applications: ApplicationData[]): Promise<ApplicationData[]> => {
         console.log('📤 지원현황 일괄 업데이트 API 호출:', {
             userId,
@@ -246,33 +218,6 @@ const api = {
         });
         await handleApiError(response);
         return response.json();
-    },
-
-    // 🔥 개선된 공고 추천 API
-    getJobRecommendations: async (userId: number, keywords: string[], locations: string[]): Promise<JobRecommendation[]> => {
-        console.log('📡 공고 추천 API 호출:', { userId, keywords, locations });
-
-        const response = await fetch(`${API_BASE_URL}/job-recommendations/${userId}`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ keywords, locations })
-        });
-
-        await handleApiError(response);
-        const data = await response.json();
-
-        console.log('✅ 공고 추천 응답:', data);
-
-        // 백엔드에서 받은 데이터 후처리
-        return data.map((job: any, index: number) => ({
-            ...job,
-            id: job.id || `${job.company}-${job.title}-${index}`,
-            deadline: job.deadline || '정보 없음',
-            url: job.url || '#',
-            keywords: job.keywords || [],
-            postedDate: job.postedDate || '',
-            matchScore: job.matchScore || 0
-        }));
     }
 };
 
@@ -440,264 +385,9 @@ const AnimatedCounter = ({ end, label, duration = 1.5, delay = 0 }: {
     );
 };
 
-// --- 🔥 개선된 추천 공고 컴포넌트 ---
-const JobRecommendations = React.memo(({ conditions, userId, isParentLoading }: {
-    conditions: ConditionsData | null,
-    userId: number,
-    isParentLoading: boolean // 💡 1. isParentLoading prop 받기
-}) => {
-    const [recommendations, setRecommendations] = useState<JobRecommendation[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // ... getDaysUntilDeadline 함수는 그대로 ...
-    const getDaysUntilDeadline = (deadline: string) => {
-        if (!deadline || deadline === '정보 없음' || deadline === '') return 999;
-        try {
-            const today = new Date();
-            let deadlineDate: Date;
-            if (deadline.includes('T')) {
-                deadlineDate = new Date(deadline);
-            } else if (deadline.includes('-')) {
-                deadlineDate = new Date(deadline + 'T00:00:00');
-            } else {
-                if (deadline.length === 8) {
-                    const year = deadline.substring(0, 4);
-                    const month = deadline.substring(4, 6);
-                    const day = deadline.substring(6, 8);
-                    deadlineDate = new Date(`${year}-${month}-${day}T00:00:00`);
-                } else {
-                    return 999;
-                }
-            }
-            if (isNaN(deadlineDate.getTime())) {
-                console.warn('잘못된 날짜 형식:', deadline);
-                return 999;
-            }
-            const diffTime = deadlineDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays >= 0 ? diffDays : -1;
-        } catch (error) {
-            console.warn('날짜 파싱 오류:', deadline, error);
-            return 999;
-        }
-    };
-
-    const fetchRecommendations = async () => {
-        // 💡 2. 부모가 로딩 중이거나, 조건이 없으면 API 호출 자체를 막습니다.
-        if (isParentLoading || !conditions || conditions.jobs.length === 0) {
-            setRecommendations([]);
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            console.log('📡 공고 추천 요청:', {
-                userId,
-                jobs: conditions.jobs,
-                locations: conditions.locations
-            });
-
-            const data = await api.getJobRecommendations(userId, conditions.jobs, conditions.locations);
-
-            console.log('✅ 공고 추천 데이터 수신:', data);
-            setRecommendations(data);
-
-        } catch (err) {
-            console.error('❌ 공고 추천 API 호출 실패:', err);
-            setError('공고를 불러오는데 실패했습니다.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // 💡 3. useEffect 의존성 배열에 isParentLoading을 추가합니다.
-    useEffect(() => {
-        fetchRecommendations();
-    }, [conditions, userId, isParentLoading]);
-
-    const handleRefresh = () => {
-        // handleRefresh는 isParentLoading과 무관하게 동작해야 하므로 그대로 둡니다.
-        fetchRecommendations();
-    };
-
-    const getDeadlineBadgeVariant = (days: number): "danger" | "warning" | "success" => {
-        if (days < 0) return "danger";
-        if (days <= 3) return "danger";
-        if (days <= 7) return "warning";
-        return "success";
-    };
-
-    // 💡 4. (선택사항이지만 권장) 부모 데이터 로딩 중일 때 별도의 UI를 보여줍니다.
-    if (isParentLoading) {
-        return (
-            <Card className="p-6 h-[400px] flex flex-col items-center justify-center">
-                <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-                <p className="mt-4 text-gray-500">사용자 정보 로딩 중...</p>
-            </Card>
-        );
-    }
-
-    if (!conditions || conditions.jobs.length === 0) {
-        return (
-            <Card className="p-6 h-[400px] flex flex-col items-center justify-center">
-                <Building className="w-12 h-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">추천 공고</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
-                    희망 직무를 설정하면<br />맞춤 공고를 추천해드려요
-                </p>
-                <Button variant="outline" onClick={() => window.location.href = '/profile'}>
-                    희망 조건 설정하기
-                </Button>
-            </Card>
-        );
-    }
-
-    // ... 나머지 return JSX는 그대로 유지 ...
-    return (
-        <Card className="p-6 h-[400px] flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center">
-                    <Building className="w-5 h-5 mr-2 text-indigo-500" />
-                    추천 공고
-                </h3>
-                <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                        {conditions.jobs.join(', ')}
-                    </Badge>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-8 h-8"
-                        onClick={handleRefresh}
-                        disabled={loading}
-                    >
-                        <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
-                    </Button>
-                </div>
-            </div>
-
-            {error && (
-                <div className="flex items-center justify-center h-full text-red-500">
-                    <AlertCircle className="w-5 h-5 mr-2" />
-                    {error}
-                </div>
-            )}
-
-            {loading ? (
-                <div className="flex items-center justify-center h-full">
-                    <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                    공고를 불러오는 중...
-                </div>
-            ) : (
-                <div className="space-y-3 overflow-y-auto flex-grow pr-2">
-                    {recommendations.map((job, index) => {
-                        const daysLeft = getDaysUntilDeadline(job.deadline);
-                        return (
-                            <motion.div
-                                key={job.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
-                                onClick={() => job.url && job.url !== '#' ? window.open(job.url, '_blank') : null}
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <p className="font-semibold text-gray-800 dark:text-gray-200 truncate text-sm">
-                                                {job.company}
-                                            </p>
-                                            {job.url && job.url !== '#' && (
-                                                <ExternalLink className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            )}
-                                            {job.matchScore && job.matchScore > 70 && (
-                                                <Badge variant="success" className="text-xs px-1.5 py-0">
-                                                    매칭 {job.matchScore}%
-                                                </Badge>
-                                            )}
-                                        </div>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-2">
-                                            {job.title}
-                                        </p>
-                                        {job.recruitCount && (
-                                            <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">
-                                                채용인원: {job.recruitCount}명
-                                            </p>
-                                        )}
-                                        <div className="flex flex-wrap gap-1 mb-2">
-                                            <Badge variant="outline" className="text-xs py-0 px-1.5">
-                                                {job.location}
-                                            </Badge>
-                                            <Badge variant="outline" className="text-xs py-0 px-1.5">
-                                                {job.experience}
-                                            </Badge>
-                                            <Badge variant="outline" className="text-xs py-0 px-1.5">
-                                                {job.employmentType}
-                                            </Badge>
-                                        </div>
-                                        {job.keywords && job.keywords.length > 0 && (
-                                            <div className="flex flex-wrap gap-1">
-                                                {job.keywords.slice(0, 2).map((keyword, i) => (
-                                                    <span key={i} className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded">
-                                                        {keyword}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="text-right flex-shrink-0">
-                                        {daysLeft >= 0 && daysLeft <= 365 && (
-                                            <Badge
-                                                variant={getDeadlineBadgeVariant(daysLeft)}
-                                                className="text-xs mb-1"
-                                            >
-                                                D-{daysLeft}
-                                            </Badge>
-                                        )}
-                                        <p className="text-xs text-gray-500">
-                                            {job.deadline !== '정보 없음' ? job.deadline : '마감일 미정'}
-                                        </p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-            )}
-
-            {!loading && !error && recommendations.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-600">
-                    <Building className="w-12 h-12 mb-4" />
-                    <p>추천할 공고가 없습니다.</p>
-                    <Button variant="outline" size="sm" className="mt-2" onClick={handleRefresh}>
-                        다시 검색
-                    </Button>
-                </div>
-            )}
-        </Card>
-    );
-});
-JobRecommendations.displayName = "JobRecommendations";
-
 // --- 페이지 컴포넌트들 (메모이제이션 적용) ---
 const ProfileCard = React.memo(({ profile, onEdit }: { profile: ProfileData, onEdit: () => void }) => {
-    const [isMatching, setIsMatching] = useState(profile.isMatching ?? true)
-
-    const handleMatchingChange = async (checked: boolean) => {
-        setIsMatching(checked);
-        if (profile.userId) {
-            try {
-                await api.updateProfile(profile.userId, { ...profile, isMatching: checked });
-            } catch (error) {
-                console.error('Failed to update matching status:', error);
-                setIsMatching(!checked); // 롤백
-            }
-        }
-    };
-
+    const [isMatching] = useState(profile.isMatching ?? true)
     return (
         <Card className="p-6 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100 via-purple-50 to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 rounded-full -mr-32 -mt-32 opacity-60"></div>
@@ -908,7 +598,6 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
     const [chartView, setChartView] = useState<"pie" | "interest">("pie")
 
     const StatusChart = React.memo(() => {
-        // 🔥 빈 배열 체크 추가
         if (!applications || applications.length === 0) {
             return (
                 <div className="h-[350px] w-full flex flex-col items-center justify-center">
@@ -928,7 +617,6 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
             { name: "불합격", value: applications.filter(a=>a.status === '불합격').length, color: "#f43f5e" }
         ].filter(d => d.value > 0);
 
-        // 🔥 모든 값이 0인 경우 처리
         if (data.length === 0) {
             return (
                 <div className="h-[350px] w-full flex flex-col items-center justify-center">
@@ -941,7 +629,14 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
             );
         }
 
-        const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+        const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: {
+            cx: number;
+            cy: number;
+            midAngle: number;
+            innerRadius: number;
+            outerRadius: number;
+            percent: number;
+        }) => {
             const RADIAN = Math.PI / 180;
             const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
             const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -957,7 +652,12 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
                         <Pie data={data} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={100} innerRadius={40} fill="#8884d8" dataKey="value" animationDuration={1200} paddingAngle={5} cornerRadius={8}>
                             {data.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} stroke={entry.color} />))}
                         </Pie>
-                        <Tooltip content={({ active, payload }) => { if (active && payload && payload.length) { return (<div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"><p className="text-sm font-semibold">{`${payload[0].name}: ${payload[0].value}개`}</p></div>) } return null }} />
+                        <Tooltip content={({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number }> }) => {
+                            if (active && payload && payload.length) {
+                                return (<div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"><p className="text-sm font-semibold">{`${payload[0].name}: ${payload[0].value}개`}</p></div>)
+                            }
+                            return null
+                        }} />
                     </PieChart>
                 </ResponsiveContainer>
                 <div className="flex justify-center mt-4">
@@ -976,7 +676,6 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
     StatusChart.displayName = "StatusChart";
 
     const InterestChart = React.memo(({data}: {data: ApplicationData[]}) => {
-        // 🔥 빈 배열 체크 추가
         if (!data || data.length === 0) {
             return (
                 <div className="h-[350px] w-full flex flex-col items-center justify-center">
@@ -999,7 +698,6 @@ const ChartSection = React.memo(({ applications }: { applications: ApplicationDa
             지원수: categoryCounts[key],
         })).sort((a, b) => b.지원수 - a.지원수);
 
-        // 🔥 차트 데이터가 없는 경우 처리
         if (chartData.length === 0) {
             return (
                 <div className="h-[350px] w-full flex flex-col items-center justify-center">
@@ -1105,9 +803,7 @@ const Header = React.memo(({ userName }: { userName?: string }) => {
 });
 Header.displayName = "Header";
 
-// ✅ 수정된 Modal 컴포넌트
-// 범용적으로 사용할 수 있도록 내부에서 특정 컴포넌트를 렌더링하는 대신,
-// 'children' prop을 받아 그대로 표시하도록 수정했습니다.
+// 범용 Modal 컴포넌트
 const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) => {
     if (!isOpen) return null;
     const handleContentClick = (e: React.MouseEvent) => e.stopPropagation();
@@ -1131,8 +827,6 @@ const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose:
         </div>
     );
 };
-
-
 
 const ProfileEditModal = ({ isOpen, onClose, profileData, onSave }: { isOpen: boolean, onClose: () => void, profileData: ProfileData, onSave: (data: ProfileData) => void }) => {
     const [data, setData] = useState(profileData);
@@ -1195,7 +889,6 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
     const [data, setData] = useState(conditionsData);
     const [isLoading, setIsLoading] = useState(false);
 
-    // ✅ 자동완성용 직무 키워드 목록
     const ALL_JOB_KEYWORDS = React.useMemo(() => [
         "사업관리", "경영", "회계", "사무", "금융", "보험", "교육", "자연과학", "사회과학",
         "법률", "경찰", "소방", "교도", "국방", "보건", "의료", "사회복지", "종교",
@@ -1223,13 +916,16 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
         }
     };
 
-    // ✅ 자동완성 기능이 추가된 태그 입력 컴포넌트
-    const TagInput = ({ label, field, placeholder, suggestionsList }: { label: string, field: keyof ConditionsData, placeholder: string, suggestionsList?: string[] }) => {
+    const TagInput = ({ label, field, placeholder, suggestionsList }: {
+        label: string,
+        field: keyof ConditionsData,
+        placeholder: string,
+        suggestionsList?: string[]
+    }) => {
         const [inputValue, setInputValue] = useState("");
         const [suggestions, setSuggestions] = useState<string[]>([]);
         const wrapperRef = useRef<HTMLDivElement>(null);
 
-        // 외부 클릭 시 추천 목록 닫기
         useEffect(() => {
             function handleClickOutside(event: MouseEvent) {
                 if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
@@ -1319,7 +1015,11 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
                 <TagInput label="근무 지역" field="locations" placeholder="지역 추가" />
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">희망 연봉(만원)</label>
-                    <Input type="number" value={data.salary} onChange={(e) => setData({ ...data, salary: e.target.value })} />
+                    <Input
+                        type="number"
+                        value={data.salary || ''}
+                        onChange={(e) => setData({ ...data, salary: e.target.value || '0' })}
+                    />
                 </div>
                 <TagInput label="기타 희망사항" field="others" placeholder="희망사항 추가" />
             </div>
@@ -1332,8 +1032,6 @@ const DesiredConditionsEditModal = ({ isOpen, onClose, conditionsData, onSave }:
         </Modal>
     )
 }
-
-// page.tsx의 ApplicationStatusModal 컴포넌트 개선
 
 const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId }: {
     isOpen: boolean,
@@ -1354,8 +1052,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
     }, [isOpen, applications, userId])
 
     const handleAdd = () => {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
         const newApp: ApplicationData = {
             id: -Date.now(),
             company: "",
@@ -1386,12 +1082,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                 userId: userId
             }));
 
-            console.log('📤 ApplicationStatusModal에서 저장 시도:', {
-                userId,
-                totalApps: appsWithUserId.length,
-                apps: appsWithUserId
-            });
-
             const response = await fetch(`${API_BASE_URL}/applications/batch/${userId}`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
@@ -1401,21 +1091,10 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
             await handleApiError(response);
             const updated = await response.json();
 
-            console.log('✅ ApplicationStatusModal 저장 완료:', {
-                userId,
-                requestCount: appsWithUserId.length,
-                resultCount: updated.length,
-                updated
-            });
-
             onSave(updated);
             onClose();
 
-            if (appsWithUserId.length === 0) {
-                alert('모든 지원현황이 삭제되었습니다.');
-            } else {
-                alert(`지원현황이 성공적으로 저장되었습니다! (${updated.length}개)`);
-            }
+            alert(`지원현황이 성공적으로 저장되었습니다! (${updated.length}개)`);
 
         } catch (error) {
             console.error('❌ ApplicationStatusModal 저장 실패:', error);
@@ -1443,7 +1122,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                     className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-[800px] lg:max-w-[900px] max-h-[90vh] sm:max-h-[85vh]"
                     onClick={handleContentClick}
                 >
-                    {/* 헤더 */}
                     <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center">
                             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
@@ -1461,9 +1139,7 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                         </Button>
                     </div>
 
-                    {/* 컨텐츠 */}
                     <div className="p-6">
-                        {/* 추가 버튼 */}
                         <div className="mb-6">
                             <Button
                                 onClick={handleAdd}
@@ -1475,7 +1151,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                             </Button>
                         </div>
 
-                        {/* 지원내역 목록 */}
                         {apps.length === 0 ? (
                             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                                 <Briefcase className="w-16 h-16 mx-auto mb-4 text-gray-300" />
@@ -1492,7 +1167,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                         className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600"
                                     >
                                         <div className="grid grid-cols-1 sm:grid-cols-10 gap-2 sm:gap-3 items-end">
-                                            {/* 회사명 */}
                                             <div className="sm:col-span-3">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                     회사명
@@ -1505,7 +1179,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                                 />
                                             </div>
 
-                                            {/* 직무 */}
                                             <div className="sm:col-span-3">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                     직무
@@ -1518,9 +1191,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                                 />
                                             </div>
 
-
-
-                                            {/* 상태 */}
                                             <div className="sm:col-span-3">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                     상태
@@ -1537,7 +1207,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                                                 </Select>
                                             </div>
 
-                                            {/* 삭제 버튼 */}
                                             <div className="sm:col-span-1 flex justify-center">
                                                 <Button
                                                     variant="ghost"
@@ -1556,7 +1225,6 @@ const ApplicationStatusModal = ({ isOpen, onClose, applications, onSave, userId 
                         )}
                     </div>
 
-                    {/* 푸터 */}
                     <div className="flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                             총 {apps.length}개의 지원내역
@@ -1606,15 +1274,9 @@ export default function CareerLogHomePage() {
     const [stats, setStats] = useState<StatsData | null>(null);
 
     const [loading, setLoading] = useState(true);
-
-    const [isProfileEditOpen, setIsProfileEditOpen] = useState(false)
-    const [isConditionsEditOpen, setIsConditionsEditOpen] = useState(false)
+    const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
+    const [isConditionsEditOpen, setIsConditionsEditOpen] = useState(false);
     const [isApplicationStatusOpen, setIsApplicationStatusOpen] = useState(false);
-
-// 🔥 추가: 각각의 저장 작업을 위한 로딩 상태
-    const [setIsProfileLoading] = useState(false);
-    const [setIsConditionsLoading] = useState(false);
-    //const [isApplicationsLoading, setIsApplicationsLoading] = useState(false);
 
     // 인증 체크
     useEffect(() => {
@@ -1638,7 +1300,6 @@ export default function CareerLogHomePage() {
             setLoading(true);
             console.log('📊 사용자 데이터 로드 중...', { userId });
 
-            // 토큰 확인
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken');
             if (!token) {
                 console.log('❌ 인증 토큰이 없음, 로그인 페이지로 이동');
@@ -1649,7 +1310,6 @@ export default function CareerLogHomePage() {
             const allData = await api.getAllData(Number(userId));
             console.log('✅ 데이터 로드 완료:', allData);
 
-            // 프로필 데이터 설정 (기본값 포함)
             setProfileData(allData.profile || {
                 name: userName || '사용자',
                 email: '',
@@ -1659,7 +1319,6 @@ export default function CareerLogHomePage() {
                 isMatching: true
             });
 
-            // 희망 조건 설정 (기본값 포함)
             setConditionsData(allData.conditions || {
                 jobs: [],
                 locations: [],
@@ -1668,15 +1327,12 @@ export default function CareerLogHomePage() {
                 userId: Number(userId)
             });
 
-            // 🔥 지원 현황 데이터 설정 - 목업 데이터 제거, 빈 배열로 시작
             setApplicationData(allData.applications || []);
-
             setStats(allData.stats);
 
         } catch (error) {
             console.error('❌ 데이터 로드 실패:', error);
 
-            // 에러 시 기본 데이터 설정
             setProfileData({
                 name: userName || '사용자',
                 email: '',
@@ -1692,7 +1348,6 @@ export default function CareerLogHomePage() {
                 others: [],
                 userId: Number(userId)
             });
-            // 🔥 에러 시에도 빈 배열로 설정 (목업 데이터 없음)
             setApplicationData([]);
             setStats(null);
         } finally {
@@ -1706,24 +1361,19 @@ export default function CareerLogHomePage() {
         }
     }, [userId, isAuthenticated, authLoading, userName]);
 
-    // 🔥 handleProfileSave 함수 수정 (메인 컴포넌트 내부)
     const handleProfileSave = async (newData: ProfileData) => {
         try {
             console.log('🔄 프로필 저장 시작:', newData);
-
             const updatedProfile = await api.updateProfile(Number(userId), newData);
             setProfileData(updatedProfile);
-
             console.log('✅ 프로필 저장 및 상태 업데이트 완료:', updatedProfile);
             alert('프로필이 성공적으로 저장되었습니다!');
-
         } catch (error) {
             console.error('❌ 프로필 저장 실패:', error);
             alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
         }
     };
 
-    // 🔥 handleConditionsSave 함수 수정 (메인 컴포넌트 내부)
     const handleConditionsSave = async (newConditionsData: ConditionsData) => {
         try {
             console.log('🔄 희망조건 저장 시작:', newConditionsData);
@@ -1737,10 +1387,8 @@ export default function CareerLogHomePage() {
 
             const updatedConditions = await api.updateConditions(Number(userId), newConditionsData);
             setConditionsData(updatedConditions);
-
             console.log('✅ 희망조건 저장 및 상태 업데이트 완료:', updatedConditions);
             alert('희망 조건이 성공적으로 저장되었습니다!');
-
         } catch (error) {
             console.error('❌ 희망조건 저장 실패:', error);
             alert('희망 조건 저장에 실패했습니다. 다시 시도해주세요.');
@@ -1821,6 +1469,7 @@ export default function CareerLogHomePage() {
                         <ChartSection applications={applicationData} />
                     </motion.div>
 
+                    {/* 🔥 EnhancedJobRecommendations만 사용 - 모든 공고 기능 포함 */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }}>
                         <EnhancedJobRecommendations
                             conditions={conditionsData}
@@ -1847,7 +1496,6 @@ export default function CareerLogHomePage() {
                         onClose={() => setIsConditionsEditOpen(false)}
                         conditionsData={conditionsData}
                         onSave={handleConditionsSave}
-                        userProfile={profileData} // 🔥 이 부분 추가
                     />
                 )}
                 {isApplicationStatusOpen && userId && (
