@@ -702,11 +702,11 @@ export default function WritePage() {
                                 <p className="text-gray-500">게시글을 작성하고 관리하세요.</p>
                             </div>
 
-                        {/* Tabs */}
-                        <Tabs
-                            value={activeTab}
-                            onValueChange={(value) => setActiveTab(value as "write" | "drafts" | "published")}
-                        >
+                            {/* Tabs */}
+                            <Tabs
+                                value={activeTab}
+                                onValueChange={(value) => setActiveTab(value as "write" | "drafts" | "published")}
+                            >
                             <TabsList className="grid w-full grid-cols-3 mb-6">
                                 <TabsTrigger value="write" className="flex items-center">
                                     <PenSquare className="h-4 w-4 mr-2"/>
