@@ -117,7 +117,7 @@ export default function ProfileDialog() {
         if (!userId) return
         setLoading(true)
         try {
-            const res = await fetch(`http://localhost:8080/api/community/profile/${userId}`, {
+            const res = await fetch(`https://initback-production-67bf.up.railway.app/api/community/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`,
                     'Content-Type': 'application/json'
@@ -224,7 +224,7 @@ export default function ProfileDialog() {
             }
 
             const method = profile.id ? 'PUT' : 'POST'
-            const response = await fetch(`http://localhost:8080/api/community/profile/${userId}`, {
+            const response = await fetch(`https://initback-production-67bf.up.railway.app/api/community/profile/${userId}`, {
                 method,
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`,

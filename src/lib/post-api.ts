@@ -1,6 +1,6 @@
 // 🔥 완전 수정된 post-api.ts - 백엔드 호환성 개선
 
-const API_BASE_URL = "http://localhost:8080/api"
+const API_BASE_URL = "https://initback-production-67bf.up.railway.app/api"
 
 // 인증 헤더 생성
 const getAuthHeaders = () => {

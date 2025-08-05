@@ -94,7 +94,7 @@ export default function ProfileModal({isOpen, onClose, userId}: ProfileModalProp
             const currentUserId = getCurrentUserId()
 
             // 백엔드 API 엔드포인트에 맞춘 URL
-            const url = new URL(`http://localhost:8080/api/community/profile/${targetUserId}/modal`)
+            const url = new URL(`https://initback-production-67bf.up.railway.app/api/community/profile/${targetUserId}/modal`)
 
             if (currentUserId) {
                 url.searchParams.append('currentUserId', currentUserId.toString())

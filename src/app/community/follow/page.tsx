@@ -59,7 +59,7 @@ export default function FollowPage() {
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken')
 
             // 백엔드 API 엔드포인트에 맞춘 URL
-            const url = new URL('http://localhost:8080/api/follows/following')
+            const url = new URL('https://initback-production-67bf.up.railway.app/api/follows/following')
             url.searchParams.append('userId', currentUserId.toString())
             url.searchParams.append('currentUserId', currentUserId.toString())
             url.searchParams.append('page', '0')
@@ -161,7 +161,7 @@ export default function FollowPage() {
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken')
 
             // 🔥 백엔드 Controller의 Query Parameter 방식에 맞춘 API 호출
-            const url = new URL('http://localhost:8080/api/follows/toggle')
+            const url = new URL('https://initback-production-67bf.up.railway.app/api/follows/toggle')
             url.searchParams.append('followerId', currentUserId.toString())
             url.searchParams.append('followingId', targetUser.userId.toString())
 

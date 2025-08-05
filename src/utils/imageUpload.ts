@@ -35,7 +35,7 @@ export const uploadImageToServer = async (file: File): Promise<UploadResult> => 
   try {
     console.log('🔄 서버에 이미지 업로드 시도...', file.name)
 
-    const response = await fetch('http://localhost:8080/api/upload/image', {
+    const response = await fetch('https://initback-production-67bf.up.railway.app/api/upload/image', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('accessToken')}`
