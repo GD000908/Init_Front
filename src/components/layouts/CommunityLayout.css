@@ -1,0 +1,188 @@
+/* ================================================================
+   커뮤니티 레이아웃 스타일
+   ================================================================ */
+
+/* 전체 앱 레이아웃 */
+.community-app-layout {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  position: relative;
+}
+
+/* 메인 컨텐츠 영역 - 사이드바 있을 때 */
+.community-main-content {
+  /* 사이드바 너비(280px)만큼 왼쪽 마진 */
+  margin-left: 280px;
+  min-height: 100vh;
+  width: calc(100% - 280px);
+  position: relative;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+/* 메인 컨텐츠 영역 - 사이드바 없을 때 */
+.community-main-content-full {
+  margin-left: 0;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+/* 커뮤니티 페이지 내부 공통 스타일 */
+.community-content {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.community-container {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.community-main {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  min-height: calc(100vh - 80px); /* 헤더 높이 제외 */
+}
+
+/* ================================================================
+   반응형 디자인 - 모바일
+   ================================================================ */
+
+/* 태블릿 (768px ~ 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .community-main-content {
+    /* 태블릿에서는 사이드바가 260px */
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
+}
+
+/* 모바일 (768px 이하) */
+@media (max-width: 768px) {
+  /* 모바일에서는 사이드바가 오버레이로 표시되므로 전체 너비 사용 */
+  .community-main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .community-main-content-full {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  /* 모바일에서 커뮤니티 컨텐츠 패딩 조정 */
+  .community-content {
+    padding-bottom: 80px; /* 모바일 메뉴 버튼을 위한 하단 여백 */
+  }
+}
+
+/* 휴대폰 가로 모드 */
+@media (max-width: 968px) and (max-height: 500px) and (orientation: landscape) {
+  .community-main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .community-content {
+    padding-bottom: 60px; /* 가로 모드에서는 패딩 줄임 */
+  }
+}
+
+/* ================================================================
+   다크 모드 지원
+   ================================================================ */
+.dark .community-app-layout {
+  background-color: #0f172a;
+}
+
+.dark .community-content {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+/* ================================================================
+   스크롤 및 접근성
+   ================================================================ */
+
+/* 부드러운 스크롤 */
+.community-main-content,
+.community-main-content-full {
+  scroll-behavior: smooth;
+}
+
+/* 모션 감소 설정 */
+@media (prefers-reduced-motion: reduce) {
+  .community-main-content,
+  .community-main-content-full,
+  .community-app-layout {
+    transition: none;
+    scroll-behavior: auto;
+  }
+}
+
+/* 높은 대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .community-app-layout {
+    background-color: #ffffff;
+  }
+
+  .dark .community-app-layout {
+    background-color: #000000;
+  }
+}
+
+/* ================================================================
+   개별 커뮤니티 페이지 스타일 오버라이드
+   ================================================================ */
+
+/* 피드 페이지 */
+.community-feed-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 글쓰기 페이지 */
+.community-write-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* 팔로우 페이지 */
+.community-follow-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 북마크 페이지 */
+.community-bookmark-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 모바일에서 개별 페이지 패딩 조정 */
+@media (max-width: 768px) {
+  .community-feed-container,
+  .community-write-container,
+  .community-follow-container,
+  .community-bookmark-container {
+    padding: 16px;
+    margin: 0;
+    max-width: none;
+  }
+}

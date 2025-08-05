@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import './CommunityLayout.css'
 
 // 동적 임포트로 클라이언트 전용 컴포넌트들 로드
 const GlobalSidebar = dynamic(() => import('@/components/GlobalSidebar'), {

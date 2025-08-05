@@ -662,15 +662,20 @@ export default function WritePage() {
     if (!userId) {
         return (
             <CommunityLayout>
-                <div
-                    className="flex-1 min-h-screen bg-gradient-to-br from-violet-50 to-indigo-100 pl-6 flex items-center justify-center">
-                    <div className="text-center">
-                        <AlertCircle className="h-12 w-12 mx-auto text-gray-400 mb-4"/>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">로그인이 필요합니다</h3>
-                        <p className="text-gray-500 mb-4">글을 작성하려면 먼저 로그인해주세요.</p>
-                        <Button onClick={() => router.push('/login')}>
-                            로그인하러 가기
-                        </Button>
+                <div className="community-content">
+                    <div className="community-container">
+                        <div className="community-main">
+                            <div className="flex items-center justify-center min-h-screen">
+                                <div className="text-center">
+                                    <AlertCircle className="h-12 w-12 mx-auto text-gray-400 mb-4"/>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">로그인이 필요합니다</h3>
+                                    <p className="text-gray-500 mb-4">글을 작성하려면 먼저 로그인해주세요.</p>
+                                    <Button onClick={() => router.push('/login')}>
+                                        로그인하러 가기
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </CommunityLayout>
@@ -683,18 +688,19 @@ export default function WritePage() {
                 initial={{opacity: 0, y: 30}}
                 animate={{opacity: 1, y: 0}}
                 transition={{duration: 0.6, ease: "easeOut"}}
-                className="flex flex-1 flex-col min-h-screen bg-gradient-to-br from-violet-50 to-indigo-100 pl-6"
+                className="community-content"
             >
-                <div className="flex-1 min-h-screen">
-                    <div className="w-full max-w-[1200px] mx-auto px-12 md:px-6 lg:px-12 py-8">
-                        {/* Header */}
-                        <div className="mb-6 pt-8">
-                            <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">
-                                <FileText className="mr-2 h-6 w-6"/>
-                                글 작성하기
-                            </h1>
-                            <p className="text-gray-500">게시글을 작성하고 관리하세요.</p>
-                        </div>
+                <div className="community-container">
+                    <div className="community-main">
+                        <div className="community-write-container">
+                            {/* Header */}
+                            <div className="mb-6 pt-8">
+                                <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">
+                                    <FileText className="mr-2 h-6 w-6"/>
+                                    글 작성하기
+                                </h1>
+                                <p className="text-gray-500">게시글을 작성하고 관리하세요.</p>
+                            </div>
 
                         {/* Tabs */}
                         <Tabs
