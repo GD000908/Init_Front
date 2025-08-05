@@ -500,7 +500,7 @@ export default function WritePage() {
             console.error("❌ 상태 변경 실패:", error)
             alert("상태 변경에 실패했습니다.")
         }
-    }, [userId, setDrafts, setPublished, allCategories])
+    }, [userId, setDrafts, setPublished])
 
     // 🔥 수정된 handleDeletePost 함수
     const handleDeletePost = useCallback(async (postToDelete: Post) => {
@@ -575,8 +575,8 @@ export default function WritePage() {
                             )}
                         </div>
                         <span className="text-xs text-gray-400">
-        {new Date(post.createdAt).toLocaleDateString()}
-      </span>
+                            {new Date(post.createdAt).toLocaleDateString()}
+                        </span>
                     </div>
                 </CardHeader>
 
@@ -658,7 +658,8 @@ export default function WritePage() {
             </Card>
         )
     }
-// 🔥 로그인 체크
+
+    // 🔥 로그인 체크
     if (!userId) {
         return (
             <CommunityLayout>
@@ -707,380 +708,376 @@ export default function WritePage() {
                                 value={activeTab}
                                 onValueChange={(value) => setActiveTab(value as "write" | "drafts" | "published")}
                             >
-                            <TabsList className="grid w-full grid-cols-3 mb-6">
-                                <TabsTrigger value="write" className="flex items-center">
-                                    <PenSquare className="h-4 w-4 mr-2"/>
-                                    글쓰기 {editingPost ? "(수정중)" : ""}
-                                </TabsTrigger>
-                                <TabsTrigger value="drafts" className="flex items-center">
-                                    <Clock className="h-4 w-4 mr-2"/>
-                                    임시저장 ({drafts.length})
-                                </TabsTrigger>
-                                <TabsTrigger value="published" className="flex items-center">
-                                    <Eye className="h-4 w-4 mr-2"/>
-                                    발행됨 ({published.length})
-                                </TabsTrigger>
-                            </TabsList>
+                                <TabsList className="grid w-full grid-cols-3 mb-6">
+                                    <TabsTrigger value="write" className="flex items-center">
+                                        <PenSquare className="h-4 w-4 mr-2"/>
+                                        글쓰기 {editingPost ? "(수정중)" : ""}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="drafts" className="flex items-center">
+                                        <Clock className="h-4 w-4 mr-2"/>
+                                        임시저장 ({drafts.length})
+                                    </TabsTrigger>
+                                    <TabsTrigger value="published" className="flex items-center">
+                                        <Eye className="h-4 w-4 mr-2"/>
+                                        발행됨 ({published.length})
+                                    </TabsTrigger>
+                                </TabsList>
 
-                            {/* Write Tab */}
-                            <TabsContent value="write" className="space-y-6 pb-20">
-                                {!showPreview ? (
-                                    <Card>
-                                        <CardHeader>
-                                            <div className="flex items-center justify-between">
-                                                <h2 className="text-xl font-semibold">
-                                                    {editingPost ? "게시글 수정하기" : "새 게시글 작성하기"}
-                                                </h2>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => setShowPreview(true)}
-                                                    disabled={!newPost.content || !selectedCategoryKey}
-                                                >
-                                                    <Eye className="h-4 w-4 mr-2"/>
-                                                    미리보기
-                                                </Button>
-                                            </div>
-                                        </CardHeader>
+                                {/* Write Tab */}
+                                <TabsContent value="write" className="space-y-6 pb-20">
+                                    {!showPreview ? (
+                                        <Card>
+                                            <CardHeader>
+                                                <div className="flex items-center justify-between">
+                                                    <h2 className="text-xl font-semibold">
+                                                        {editingPost ? "게시글 수정하기" : "새 게시글 작성하기"}
+                                                    </h2>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setShowPreview(true)}
+                                                        disabled={!newPost.content || !selectedCategoryKey}
+                                                    >
+                                                        <Eye className="h-4 w-4 mr-2"/>
+                                                        미리보기
+                                                    </Button>
+                                                </div>
+                                            </CardHeader>
 
-                                        <CardContent className="space-y-4">
-                                            {/* 카테고리 선택 */}
-                                            <div className="space-y-2">
-                                                <label htmlFor="postCategory" className="text-sm font-medium">
-                                                    카테고리 <span className="text-red-500">*</span>
-                                                </label>
-                                                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                                                    <PopoverTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            role="combobox"
-                                                            aria-expanded={popoverOpen}
-                                                            className="w-full justify-between pr-3"
-                                                        >
-                                                            {displayCategoryText}
-                                                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent
-                                                        className="w-[var(--radix-popover-trigger-width)] p-0">
-                                                        <div className="p-4 space-y-4">
-                                                            <div className="flex p-1 rounded-md bg-gray-100 mb-2">
-                                                                <Button
-                                                                    variant={categoryType === "job" ? "default" : "ghost"}
-                                                                    className="flex-1 justify-center py-2 text-sm font-medium rounded-md"
-                                                                    onClick={() => handleCategoryTypeChange("job")}
-                                                                >
-                                                                    직무별
-                                                                </Button>
-                                                                <Button
-                                                                    variant={categoryType === "topic" ? "default" : "ghost"}
-                                                                    className="flex-1 justify-center py-2 text-sm font-medium rounded-md"
-                                                                    onClick={() => handleCategoryTypeChange("topic")}
-                                                                >
-                                                                    주제별
-                                                                </Button>
+                                            <CardContent className="space-y-4">
+                                                {/* 카테고리 선택 */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="postCategory" className="text-sm font-medium">
+                                                        카테고리 <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                                                        <PopoverTrigger asChild>
+                                                            <Button
+                                                                variant="outline"
+                                                                role="combobox"
+                                                                aria-expanded={popoverOpen}
+                                                                className="w-full justify-between pr-3"
+                                                            >
+                                                                {displayCategoryText}
+                                                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                                                            </Button>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                                                            <div className="p-4 space-y-4">
+                                                                <div className="flex p-1 rounded-md bg-gray-100 mb-2">
+                                                                    <Button
+                                                                        variant={categoryType === "job" ? "default" : "ghost"}
+                                                                        className="flex-1 justify-center py-2 text-sm font-medium rounded-md"
+                                                                        onClick={() => handleCategoryTypeChange("job")}
+                                                                    >
+                                                                        직무별
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant={categoryType === "topic" ? "default" : "ghost"}
+                                                                        className="flex-1 justify-center py-2 text-sm font-medium rounded-md"
+                                                                        onClick={() => handleCategoryTypeChange("topic")}
+                                                                    >
+                                                                        주제별
+                                                                    </Button>
+                                                                </div>
+
+                                                                <ScrollArea className="h-[200px]">
+                                                                    <Command>
+                                                                        <CommandGroup>
+                                                                            {visibleCategories.map((category) => {
+                                                                                const CategoryIcon = category.icon
+                                                                                const isSelected = selectedCategoryKey === category.key
+                                                                                return (
+                                                                                    <CommandItem
+                                                                                        key={category.key}
+                                                                                        value={category.label}
+                                                                                        onSelect={() => handleCategorySelect(category)}
+                                                                                        className="flex items-center justify-between cursor-pointer py-2 px-3 text-sm hover:bg-violet-100 focus:bg-violet-100"
+                                                                                    >
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <CategoryIcon
+                                                                                                className="h-4 w-4"
+                                                                                                style={{color: category.color}}
+                                                                                            />
+                                                                                            {category.label}
+                                                                                        </div>
+                                                                                        {isSelected && (
+                                                                                            <Check className="ml-auto h-4 w-4 text-[#5B21B6]"/>
+                                                                                        )}
+                                                                                    </CommandItem>
+                                                                                )
+                                                                            })}
+                                                                        </CommandGroup>
+                                                                    </Command>
+                                                                </ScrollArea>
                                                             </div>
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                </div>
 
-                                                            <ScrollArea className="h-[200px]">
-                                                                <Command>
-                                                                    <CommandGroup>
-                                                                        {visibleCategories.map((category) => {
-                                                                            const CategoryIcon = category.icon
-                                                                            const isSelected = selectedCategoryKey === category.key
-                                                                            return (
-                                                                                <CommandItem
-                                                                                    key={category.key}
-                                                                                    value={category.label}
-                                                                                    onSelect={() => handleCategorySelect(category)}
-                                                                                    className="flex items-center justify-between cursor-pointer py-2 px-3 text-sm hover:bg-violet-100 focus:bg-violet-100"
-                                                                                >
-                                                                                    <div
-                                                                                        className="flex items-center gap-2">
-                                                                                        <CategoryIcon
-                                                                                            className="h-4 w-4"
-                                                                                            style={{color: category.color}}
-                                                                                        />
-                                                                                        {category.label}
-                                                                                    </div>
-                                                                                    {isSelected && (
-                                                                                        <Check
-                                                                                            className="ml-auto h-4 w-4 text-[#5B21B6]"/>
-                                                                                    )}
-                                                                                </CommandItem>
-                                                                            )
-                                                                        })}
-                                                                    </CommandGroup>
-                                                                </Command>
-                                                            </ScrollArea>
-                                                        </div>
-                                                    </PopoverContent>
-                                                </Popover>
-                                            </div>
-
-                                            {/* 내용 입력 */}
-                                            <div className="space-y-2">
-                                                <label htmlFor="postMainContent" className="text-sm font-medium">
-                                                    내용 <span className="text-red-500">*</span>
-                                                </label>
-                                                <Textarea
-                                                    id="postMainContent"
-                                                    placeholder="게시글 내용을 입력하세요..."
-                                                    value={newPost.content}
-                                                    onChange={(e) => setNewPost(prev => ({
-                                                        ...prev,
-                                                        content: e.target.value
-                                                    }))}
-                                                    className="min-h-[200px]"
-                                                />
-                                            </div>
-
-                                            {/* 해시태그 입력 */}
-                                            <div className="space-y-2">
-                                                <label htmlFor="postHashtags" className="text-sm font-medium">
-                                                    해시태그
-                                                </label>
-                                                <div className="flex items-center">
-                                                    <Hash className="h-4 w-4 mr-2 text-gray-400"/>
-                                                    <Input
-                                                        id="postHashtags"
-                                                        placeholder="해시태그 입력 (쉼표로 구분)"
-                                                        value={newPost.hashtags}
+                                                {/* 내용 입력 */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="postMainContent" className="text-sm font-medium">
+                                                        내용 <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <Textarea
+                                                        id="postMainContent"
+                                                        placeholder="게시글 내용을 입력하세요..."
+                                                        value={newPost.content}
                                                         onChange={(e) => setNewPost(prev => ({
                                                             ...prev,
-                                                            hashtags: e.target.value
+                                                            content: e.target.value
                                                         }))}
+                                                        className="min-h-[200px]"
                                                     />
                                                 </div>
-                                                <p className="text-xs text-gray-500">예: #취업팁, #면접준비, #포트폴리오</p>
-                                            </div>
 
-                                            {/* 이미지 업로드 */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">이미지 첨부</label>
-                                                <div
-                                                    className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                                                    onDragOver={(e) => e.preventDefault()}
-                                                    onDrop={handleImageUpload}
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                >
-                                                    {newPost.image ? (
-                                                        <div className="relative">
-                                                            <img
-                                                                src={newPost.image}
-                                                                alt="Uploaded preview"
-                                                                className="mx-auto max-h-48 object-contain rounded-md"
-                                                            />
-                                                            <Button
-                                                                variant="outline"
-                                                                size="icon"
-                                                                className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full bg-white shadow-md"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setNewPost(prev => ({...prev, image: null}))
-                                                                }}
-                                                                disabled={isUploading}
-                                                            >
-                                                                <X className="h-4 w-4"/>
-                                                            </Button>
-                                                        </div>
-                                                    ) : (
-                                                        <div>
-                                                            <ImageIcon
-                                                                className="h-10 w-10 mx-auto text-gray-300 mb-2"/>
-                                                            <p className="text-sm text-gray-500 mb-1">
-                                                                이미지를 드래그하거나 클릭하여 업로드하세요
-                                                            </p>
-                                                            <p className="text-xs text-gray-400">
-                                                                JPG, PNG, GIF 파일 (최대 5MB)
-                                                            </p>
-                                                            <input
-                                                                type="file"
-                                                                accept="image/*"
-                                                                ref={fileInputRef}
-                                                                onChange={handleImageUpload}
-                                                                className="hidden"
-                                                            />
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                className="mt-2"
-                                                                disabled={isUploading}
-                                                            >
-                                                                {isUploading ? "업로드 중..." : "이미지 선택"}
-                                                            </Button>
-                                                        </div>
-                                                    )}
+                                                {/* 해시태그 입력 */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="postHashtags" className="text-sm font-medium">
+                                                        해시태그
+                                                    </label>
+                                                    <div className="flex items-center">
+                                                        <Hash className="h-4 w-4 mr-2 text-gray-400"/>
+                                                        <Input
+                                                            id="postHashtags"
+                                                            placeholder="해시태그 입력 (쉼표로 구분)"
+                                                            value={newPost.hashtags}
+                                                            onChange={(e) => setNewPost(prev => ({
+                                                                ...prev,
+                                                                hashtags: e.target.value
+                                                            }))}
+                                                        />
+                                                    </div>
+                                                    <p className="text-xs text-gray-500">예: #취업팁, #면접준비, #포트폴리오</p>
                                                 </div>
-                                            </div>
-                                        </CardContent>
 
-                                        <CardFooter className="flex items-center justify-between w-full">
-                                            <Button variant="outline" onClick={resetForm}>
-                                                {editingPost ? "수정 취소" : "새로 작성"}
-                                            </Button>
-                                            <div className="space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={() => handleSavePost("draft")}
-                                                    disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
-                                                >
-                                                    임시저장
+                                                {/* 이미지 업로드 */}
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium">이미지 첨부</label>
+                                                    <div
+                                                        className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                                                        onDragOver={(e) => e.preventDefault()}
+                                                        onDrop={handleImageUpload}
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                    >
+                                                        {newPost.image ? (
+                                                            <div className="relative">
+                                                                <img
+                                                                    src={newPost.image}
+                                                                    alt="Uploaded preview"
+                                                                    className="mx-auto max-h-48 object-contain rounded-md"
+                                                                />
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full bg-white shadow-md"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        setNewPost(prev => ({...prev, image: null}))
+                                                                    }}
+                                                                    disabled={isUploading}
+                                                                >
+                                                                    <X className="h-4 w-4"/>
+                                                                </Button>
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                <ImageIcon className="h-10 w-10 mx-auto text-gray-300 mb-2"/>
+                                                                <p className="text-sm text-gray-500 mb-1">
+                                                                    이미지를 드래그하거나 클릭하여 업로드하세요
+                                                                </p>
+                                                                <p className="text-xs text-gray-400">
+                                                                    JPG, PNG, GIF 파일 (최대 5MB)
+                                                                </p>
+                                                                <input
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    ref={fileInputRef}
+                                                                    onChange={handleImageUpload}
+                                                                    className="hidden"
+                                                                />
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="mt-2"
+                                                                    disabled={isUploading}
+                                                                >
+                                                                    {isUploading ? "업로드 중..." : "이미지 선택"}
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+
+                                            <CardFooter className="flex items-center justify-between w-full">
+                                                <Button variant="outline" onClick={resetForm}>
+                                                    {editingPost ? "수정 취소" : "새로 작성"}
                                                 </Button>
-                                                <Button
-                                                    onClick={() => handleSavePost("published")}
-                                                    disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
-                                                    className="bg-[#6366f1] hover:bg-[#6366f1]/90"
-                                                >
-                                                    {editingPost ? "수정 완료" : "발행하기"}
-                                                </Button>
-                                            </div>
-                                        </CardFooter>
-                                    </Card>
-                                ) : (
-                                    // 미리보기 모드
-                                    <Card>
-                                        <CardHeader>
-                                            <div className="flex justify-between items-center">
-                                                <h2 className="text-xl font-semibold">미리보기</h2>
-                                                <Button variant="outline" size="sm"
-                                                        onClick={() => setShowPreview(false)}>
-                                                    <PenSquare className="h-4 w-4 mr-2"/>
+                                                <div className="space-x-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => handleSavePost("draft")}
+                                                        disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
+                                                    >
+                                                        임시저장
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => handleSavePost("published")}
+                                                        disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
+                                                        className="bg-[#6366f1] hover:bg-[#6366f1]/90"
+                                                    >
+                                                        {editingPost ? "수정 완료" : "발행하기"}
+                                                    </Button>
+                                                </div>
+                                            </CardFooter>
+                                        </Card>
+                                    ) : (
+                                        // 미리보기 모드
+                                        <Card>
+                                            <CardHeader>
+                                                <div className="flex justify-between items-center">
+                                                    <h2 className="text-xl font-semibold">미리보기</h2>
+                                                    <Button variant="outline" size="sm" onClick={() => setShowPreview(false)}>
+                                                        <PenSquare className="h-4 w-4 mr-2"/>
+                                                        편집으로 돌아가기
+                                                    </Button>
+                                                </div>
+                                            </CardHeader>
+
+                                            <CardContent className="space-y-4">
+                                                {/* 카테고리 표시 */}
+                                                {selectedCategoryKey && (
+                                                    <div className="flex items-center gap-2">
+                                                        {(() => {
+                                                            const categoryInfo = allCategories.find(c => c.key === selectedCategoryKey)
+                                                            if (!categoryInfo) return null
+                                                            const CategoryIcon = categoryInfo.icon
+                                                            return (
+                                                                <Badge
+                                                                    style={{
+                                                                        backgroundColor: `${categoryInfo.color}20`,
+                                                                        color: categoryInfo.color
+                                                                    }}
+                                                                    className="font-normal"
+                                                                >
+                                                                    <CategoryIcon className="h-3 w-3 mr-1"/>
+                                                                    {categoryInfo.label}
+                                                                </Badge>
+                                                            )
+                                                        })()}
+                                                    </div>
+                                                )}
+
+                                                {/* 이미지 표시 */}
+                                                {newPost.image && (
+                                                    <div className="mb-4">
+                                                        <img
+                                                            src={getFullImageUrl(newPost.image) || newPost.image}
+                                                            alt="Post preview"
+                                                            className="mx-auto max-h-64 object-contain rounded-md"
+                                                            onError={(e) => handleImageError(newPost.image!, e.currentTarget)}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {/* 내용 표시 */}
+                                                <div className="prose max-w-none">
+                                                    <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+                                                        {newPost.content}
+                                                    </p>
+                                                </div>
+
+                                                {/* 해시태그 표시 */}
+                                                {newPost.hashtags && (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {newPost.hashtags
+                                                            .split(",")
+                                                            .map(t => t.trim())
+                                                            .filter(Boolean)
+                                                            .map(t => t.startsWith("#") ? t : `#${t}`)
+                                                            .map((tag, index) => (
+                                                                <Badge
+                                                                    key={index}
+                                                                    variant="secondary"
+                                                                    className="text-xs bg-[#6366f1]/10 text-[#6366f1] hover:bg-[#6366f1]/20"
+                                                                >
+                                                                    {tag}
+                                                                </Badge>
+                                                            ))}
+                                                    </div>
+                                                )}
+                                            </CardContent>
+
+                                            <CardFooter className="flex items-center justify-between w-full">
+                                                <Button variant="outline" onClick={() => setShowPreview(false)}>
                                                     편집으로 돌아가기
                                                 </Button>
-                                            </div>
-                                        </CardHeader>
-
-                                        <CardContent className="space-y-4">
-                                            {/* 카테고리 표시 */}
-                                            {selectedCategoryKey && (
-                                                <div className="flex items-center gap-2">
-                                                    {(() => {
-                                                        const categoryInfo = allCategories.find(c => c.key === selectedCategoryKey)
-                                                        if (!categoryInfo) return null
-                                                        const CategoryIcon = categoryInfo.icon
-                                                        return (
-                                                            <Badge
-                                                                style={{
-                                                                    backgroundColor: `${categoryInfo.color}20`,
-                                                                    color: categoryInfo.color
-                                                                }}
-                                                                className="font-normal"
-                                                            >
-                                                                <CategoryIcon className="h-3 w-3 mr-1"/>
-                                                                {categoryInfo.label}
-                                                            </Badge>
-                                                        )
-                                                    })()}
+                                                <div className="space-x-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => handleSavePost("draft")}
+                                                        disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
+                                                    >
+                                                        임시저장
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => handleSavePost("published")}
+                                                        disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
+                                                        className="bg-[#6366f1] hover:bg-[#6366f1]/90"
+                                                    >
+                                                        {editingPost ? "수정 완료" : "발행하기"}
+                                                    </Button>
                                                 </div>
-                                            )}
+                                            </CardFooter>
+                                        </Card>
+                                    )}
+                                </TabsContent>
 
-                                            {/* 이미지 표시 */}
-                                            {newPost.image && (
-                                                <div className="mb-4">
-                                                    <img
-                                                        src={getFullImageUrl(newPost.image) || newPost.image}
-                                                        alt="Post preview"
-                                                        className="mx-auto max-h-64 object-contain rounded-md"
-                                                        onError={(e) => handleImageError(newPost.image!, e.currentTarget)}
-                                                    />
-                                                </div>
-                                            )}
+                                {/* Drafts Tab */}
+                                <TabsContent value="drafts" className="pb-20">
+                                    {drafts.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {drafts.map((post) => (
+                                                <PostCardDisplay key={post.id} post={post}/>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <Alert>
+                                            <AlertCircle className="h-4 w-4"/>
+                                            <AlertTitle>임시저장된 게시글이 없습니다</AlertTitle>
+                                            <AlertDescription>새 게시글을 작성하고 임시저장해보세요.</AlertDescription>
+                                        </Alert>
+                                    )}
+                                </TabsContent>
 
-                                            {/* 내용 표시 */}
-                                            <div className="prose max-w-none">
-                                                <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                                                    {newPost.content}
-                                                </p>
-                                            </div>
+                                {/* Published Tab */}
+                                <TabsContent value="published" className="pb-20">
+                                    {published.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {published.map((post) => (
+                                                <PostCardDisplay key={post.id} post={post}/>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <Alert>
+                                            <AlertCircle className="h-4 w-4"/>
+                                            <AlertTitle>발행된 게시글이 없습니다</AlertTitle>
+                                            <AlertDescription>새 게시글을 작성하고 발행해보세요.</AlertDescription>
+                                        </Alert>
+                                    )}
+                                </TabsContent>
+                            </Tabs>
 
-                                            {/* 해시태그 표시 */}
-                                            {newPost.hashtags && (
-                                                <div className="flex flex-wrap gap-2">
-                                                    {newPost.hashtags
-                                                        .split(",")
-                                                        .map(t => t.trim())
-                                                        .filter(Boolean)
-                                                        .map(t => t.startsWith("#") ? t : `#${t}`)
-                                                        .map((tag, index) => (
-                                                            <Badge
-                                                                key={index}
-                                                                variant="secondary"
-                                                                className="text-xs bg-[#6366f1]/10 text-[#6366f1] hover:bg-[#6366f1]/20"
-                                                            >
-                                                                {tag}
-                                                            </Badge>
-                                                        ))}
-                                                </div>
-                                            )}
-                                        </CardContent>
-
-                                        <CardFooter className="flex items-center justify-between w-full">
-                                            <Button variant="outline" onClick={() => setShowPreview(false)}>
-                                                편집으로 돌아가기
-                                            </Button>
-                                            <div className="space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={() => handleSavePost("draft")}
-                                                    disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
-                                                >
-                                                    임시저장
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleSavePost("published")}
-                                                    disabled={!newPost.content.trim() || !selectedCategoryKey || isUploading}
-                                                    className="bg-[#6366f1] hover:bg-[#6366f1]/90"
-                                                >
-                                                    {editingPost ? "수정 완료" : "발행하기"}
-                                                </Button>
-                                            </div>
-                                        </CardFooter>
-                                    </Card>
-                                )}
-                            </TabsContent>
-
-                            {/* Drafts Tab */}
-                            <TabsContent value="drafts" className="pb-20">
-                                {drafts.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {drafts.map((post) => (
-                                            <PostCardDisplay key={post.id} post={post}/>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <Alert>
-                                        <AlertCircle className="h-4 w-4"/>
-                                        <AlertTitle>임시저장된 게시글이 없습니다</AlertTitle>
-                                        <AlertDescription>새 게시글을 작성하고 임시저장해보세요.</AlertDescription>
-                                    </Alert>
-                                )}
-                            </TabsContent>
-
-                            {/* Published Tab */}
-                            <TabsContent value="published" className="pb-20">
-                                {published.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {published.map((post) => (
-                                            <PostCardDisplay key={post.id} post={post}/>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <Alert>
-                                        <AlertCircle className="h-4 w-4"/>
-                                        <AlertTitle>발행된 게시글이 없습니다</AlertTitle>
-                                        <AlertDescription>새 게시글을 작성하고 발행해보세요.</AlertDescription>
-                                    </Alert>
-                                )}
-                            </TabsContent>
-                        </Tabs>
-
-                        <UpwardMenu
-                            className="fixed bottom-6 right-6 z-[999]"
-                            onFollowClick={() => router.push("/community/follow")}
-                            onMyPostsClick={() => router.push("/community/write")}
-                            onMyCommentsClick={() => router.push("/community/reply")}
-                            onSavedClick={() => router.push("/community/bookmark")}
-                        />
+                            <UpwardMenu
+                                className="fixed bottom-6 right-6 z-[999]"
+                                onFollowClick={() => router.push("/community/follow")}
+                                onMyPostsClick={() => router.push("/community/write")}
+                                onMyCommentsClick={() => router.push("/community/reply")}
+                                onSavedClick={() => router.push("/community/bookmark")}
+                            />
+                        </div>
                     </div>
                 </div>
             </motion.div>
