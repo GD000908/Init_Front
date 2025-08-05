@@ -12,7 +12,7 @@ import {
     deleteComment, toggleFollow, checkFollowStatus, type PostResponse, type CommentResponse, type ApiResponse
 } from "@/lib/post-api"
 import {getCurrentUserId} from "@/utils/auth"
-import {getFullImageUrl, handleImageError} from "@/utils/imageUtils"
+import {getFullImageUrl} from "@/utils/imageUtils"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"

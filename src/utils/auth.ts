@@ -1,4 +1,43 @@
 // utils/auth.ts
+
+/**
+ * 현재 로그인한 사용자의 ID를 가져옵니다
+ */
+export const getCurrentUserId = (): number | null => {
+    if (typeof window === 'undefined') return null;
+    
+    const userId = localStorage.getItem('userId');
+    return userId ? parseInt(userId, 10) : null;
+};
+
+/**
+ * 현재 로그인한 사용자의 이름을 가져옵니다
+ */
+export const getCurrentUserName = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    
+    return localStorage.getItem('userName') || localStorage.getItem('name');
+};
+
+/**
+ * 사용자의 인증 토큰을 가져옵니다
+ */
+export const getAuthToken = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    
+    return localStorage.getItem('authToken') || localStorage.getItem('accessToken');
+};
+
+/**
+ * 사용자가 로그인 되어있는지 확인합니다
+ */
+export const isAuthenticated = (): boolean => {
+    const userId = getCurrentUserId();
+    const token = getAuthToken();
+    
+    return userId !== null && token !== null;
+};
+
 export const clearAllAuthData = () => {
     console.log('🚪 Starting complete logout process...');
 
