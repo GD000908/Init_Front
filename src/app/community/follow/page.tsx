@@ -210,7 +210,7 @@ export default function FollowPage() {
                 transition={{duration: 0.6, ease: "easeOut"}}
                 className="community-content"
             >
-                <div className="community-container">
+                <div className="community-container bg-blue-50">
                     <div className="community-main">
                         <div className="community-follow-container">
                             {/* Header */}
