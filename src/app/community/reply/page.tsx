@@ -539,9 +539,9 @@ export default function ReplyPage() {
                 transition={{duration: 0.6, ease: "easeOut"}}
                 className="community-content bg-gradient-to-br from-violet-50 to-indigo-100 min-h-screen"
             >
-                <div className="community-container">
+                <div className="community-container bg-yellow-50">
                     <div className="community-main">
-                        <div className="w-full max-w-[1200px] mx-auto px-12 md:px-6 lg:px-14 py-8">
+                        <div className="community-reply-container">
                             {/* Header */}
                             <div className="mb-6 pt-8">
                                 <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">

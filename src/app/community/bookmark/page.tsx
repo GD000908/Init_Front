@@ -435,7 +435,7 @@ export default function BookmarkPage() {
                 transition={{duration: 0.6, ease: "easeOut"}}
                 className="flex flex-1 flex-col min-h-screen bg-gradient-to-br from-violet-50 to-indigo-100"
             >
-                <div className="flex-1 min-h-screen bg-orange-50">
+                <div className="flex-1 min-h-screen bg-red-50">
                     <div className="px-6 py-8 w-full max-w-[1200px] mx-auto">
                         <div className="w-full max-w-[1200px] mx-auto px-12 md:px-6 lg:px-8 py-0">
                             <div className="mb-6 pt-8">

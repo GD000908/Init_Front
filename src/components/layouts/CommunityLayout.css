@@ -156,12 +156,19 @@
 /* 글쓰기 페이지 */
 .community-write-container {
   padding: 20px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 /* 팔로우 페이지 */
 .community-follow-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 댓글 페이지 */
+.community-reply-container {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
