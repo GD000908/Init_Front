@@ -153,15 +153,15 @@
   margin: 0 auto;
 }
 
-/* 글쓰기 페이지 */
-.community-write-container {
+/* 팔로우 페이지 */
+.community-follow-container {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* 팔로우 페이지 */
-.community-follow-container {
+/* 글쓰기 페이지 */
+.community-write-container {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;

@@ -1024,9 +1024,9 @@ export default function FeedPage() {
                 transition={{duration: 0.6, ease: "easeOut"}}
                 className="flex flex-1 flex-col min-h-screen bg-gradient-to-br from-violet-50 to-indigo-100 pl-6"
             >
-                <div className="flex flex-1 flex-col min-h-screen bg-gradient-to-br from-violet-50 to-indigo-100 pl-6">
-                    <div className="flex-1 overflow-y-auto relative" ref={contentRef}>
-                        <div className="w-full max-w-[1200px] mx-auto px-12 md:px-6 lg:px-8 py-8">
+                <div className="community-container bg-gradient-to-br from-violet-50 to-indigo-100 pl-6">
+                    <div className="community-main" ref={contentRef}>
+                        <div className="community-feed-container">
                             {/* 필터 헤더 */}
                             <div className="mb-6 pt-8">
                                 <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">

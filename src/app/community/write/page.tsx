@@ -691,9 +691,9 @@ export default function WritePage() {
                 transition={{duration: 0.6, ease: "easeOut"}}
                 className="community-content"
             >
-                <div className="community-container bg-green-50">
+                <div className=" bg-green-50">
                     <div className="community-main">
-                        <div className="community-write-container">
+                        <div className="commucommunity-containernity-write-container">
                             {/* Header */}
                             <div className="mb-6 pt-8">
                                 <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">
