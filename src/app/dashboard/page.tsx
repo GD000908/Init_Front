@@ -1,5 +1,5 @@
 "use client"
-
+//대시보드
 import * as React from "react"
 import { useState, useEffect, useRef } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts"
