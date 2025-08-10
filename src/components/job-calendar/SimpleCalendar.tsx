@@ -162,7 +162,7 @@ export default function SimpleCalendar({
             </div>
 
             {/* 캘린더 컨테이너 */}
-            <div className="calendar-container bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden h-[500px] sm:h-[600px] lg:h-[700px]">
+            <div className="calendar-container bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden h-[550px] sm:h-[600px] lg:h-[700px]">
                 <div className="grid grid-cols-7 h-full">
                     {/* 요일 헤더 */}
                     {weekdays.map((day, index) => (
@@ -192,7 +192,7 @@ export default function SimpleCalendar({
                         return (
                             <div
                                 key={`day-${index}`}
-                                className={`relative min-h-[85px] sm:min-h-[90px] lg:min-h-[100px] p-1 sm:p-2 border-r border-b border-gray-100 dark:border-gray-800 transition-all ${
+                                className={`relative min-h-[95px] sm:min-h-[90px] lg:min-h-[100px] p-1 sm:p-2 border-r border-b border-gray-100 dark:border-gray-800 transition-all ${
                                     isCurrentMonth
                                         ? isToday
                                             ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700"
