@@ -192,7 +192,7 @@ export default function SimpleCalendar({
                         return (
                             <div
                                 key={`day-${index}`}
-                                className={`relative min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] p-1 sm:p-2 border-r border-b border-gray-100 dark:border-gray-800 transition-all ${
+                                className={`relative min-h-[85px] sm:min-h-[90px] lg:min-h-[100px] p-1 sm:p-2 border-r border-b border-gray-100 dark:border-gray-800 transition-all ${
                                     isCurrentMonth
                                         ? isToday
                                             ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700"
@@ -278,8 +278,9 @@ export default function SimpleCalendar({
                                     {events.length > 2 && (
                                         <Popover>
                                             <PopoverTrigger asChild>
-                                                <button className="w-full text-xs text-indigo-600 dark:text-indigo-400 font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-sm text-left hover:bg-indigo-100 dark:hover:bg-indigo-900/30">
-                                                    + {events.length - 2} more...
+                                                <button className="w-full text-xs text-indigo-600 dark:text-indigo-400 font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-sm text-center hover:bg-indigo-100 dark:hover:bg-indigo-900/30 truncate">
+                                                    <span className="hidden sm:inline">+ {events.length - 2} more...</span>
+                                                    <span className="sm:hidden">+{events.length - 2}</span>
                                                 </button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-60 p-2 space-y-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg shadow-xl">
